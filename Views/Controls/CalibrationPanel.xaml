@@ -1,0 +1,79 @@
+<UserControl x:Class="ATS_WPF.Views.Controls.CalibrationPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ATS_WPF.Views.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="600">
+    <UserControl.Resources>
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="3" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98" CenterX="0.5" CenterY="0.5"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#FFCCCCCC"/>
+                                <Setter Property="Foreground" Value="#FF666666"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#FFDC3545"/>
+        </Style>
+    </UserControl.Resources>
+    
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <Button Content="Switch Mode" Command="{Binding SwitchSystemModeCommand}"
+                Style="{StaticResource ModernButton}" Background="#FF673AB7" 
+                Height="44" Width="110" FontSize="13" Margin="3,0"/>
+        
+        <Button Content="Switch ADC" Command="{Binding SwitchAdcModeCommand}"
+                Style="{StaticResource ModernButton}" Background="#FF2196F3" 
+                Height="44" Width="110" FontSize="13" Margin="3,0"/>
+
+        <Rectangle Width="1" Fill="#FFDDDDDD" Margin="10,2,10,2" Height="24"/>
+
+        <Button Content="Tare" Command="{Binding TareCommand}"
+                Style="{StaticResource ModernButton}" Background="#FF3498DB" 
+                Width="85" Height="44" FontSize="13" Margin="3,0"/>
+                
+        <Button Content="Calibrate" Command="{Binding CalibrateCommand}"
+                Style="{StaticResource ModernButton}" Background="#FF27AE60" 
+                Width="90" Height="44" FontSize="13" Margin="3,0"/>
+                
+        <Button Content="Reset Calibration" Command="{Binding ResetCalibrationCommand}"
+                Style="{StaticResource ModernButton}" Background="#FFE74C3C" 
+                Width="160" Height="44" FontSize="13" Margin="3,0"/>
+                
+        <Button Content="Reset Tare" Command="{Binding ResetTareCommand}"
+                Style="{StaticResource DangerButton}" 
+                Height="44" Width="110" FontSize="13" Margin="3,0"/>
+                
+        <Button Content="🚗 Two Wheeler" Command="{Binding OpenTwoWheelerCommand}"
+                Style="{StaticResource ModernButton}" Background="#FF27AE60" 
+                Height="44" Width="165" FontSize="13" Margin="4,0"/>
+    </StackPanel>
+</UserControl>
+

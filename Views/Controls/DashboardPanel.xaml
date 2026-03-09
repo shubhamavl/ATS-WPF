@@ -1,0 +1,136 @@
+<UserControl x:Class="ATS_WPF.Views.Controls.DashboardPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ATS_WPF.Views.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="800">
+    <UserControl.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="White" CornerRadius="8" Margin="0">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Direction="270" ShadowDepth="1" Opacity="0.1" BlurRadius="5"/>
+        </Border.Effect>
+        
+        <Border Padding="20">
+            <StackPanel>
+                <!-- HERO: Display Weight/Force -->
+                <Border CornerRadius="12" Padding="2" Margin="0,0,0,15">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                            <GradientStop Color="#FF27AE60" Offset="0"/>
+                            <GradientStop Color="#FF2ECC71" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                    <Border Background="#FFF9FBF9" CornerRadius="10" Padding="30">
+                        <StackPanel>
+                            <TextBlock Text="{Binding WeightText}" 
+                                       FontSize="84" FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       Foreground="#FF2C3E50">
+                                <TextBlock.Effect>
+                                    <DropShadowEffect Color="White" ShadowDepth="0" BlurRadius="5" Opacity="1"/>
+                                </TextBlock.Effect>
+                            </TextBlock>
+                            <TextBlock Text="{Binding SystemModeText, StringFormat='Mode: {0}'}" 
+                                       FontSize="14" FontWeight="SemiBold" 
+                                       HorizontalAlignment="Center" Foreground="#FF7F8C8D"/>
+                        </StackPanel>
+                    </Border>
+                </Border>
+            
+                <!-- Unified Horizontal Metrics Bar -->
+                <Border Background="#FFF1F3F5" CornerRadius="4" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>   <!-- Streaming -->
+                            <ColumnDefinition Width="Auto"/> <!-- Sep -->
+                            <ColumnDefinition Width="*"/>   <!-- Sampling -->
+                            <ColumnDefinition Width="Auto"/> <!-- Sep -->
+                            <ColumnDefinition Width="*"/>   <!-- Integrity -->
+                            <ColumnDefinition Width="Auto"/> <!-- Sep -->
+                            <ColumnDefinition Width="*"/>   <!-- Tare -->
+                            <ColumnDefinition Width="Auto"/> <!-- Sep -->
+                            <ColumnDefinition Width="*"/>   <!-- Raw ADC -->
+                            <ColumnDefinition Width="Auto"/> <!-- Sep -->
+                            <ColumnDefinition Width="*"/>   <!-- Peak -->
+                        </Grid.ColumnDefinitions>           
+                        
+                        <!-- Streaming -->
+                        
+                         <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="STREAM" FontSize="11" FontWeight="Bold" Foreground="#FF95A5A6" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Ellipse Width="7" Height="7" Fill="{Binding StreamIndicatorColor}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding StreamStatusText}" FontSize="15" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Separator Grid.Column="1" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0" Height="35"/>
+
+                        <!-- Sampling -->
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="SAMPLING" FontSize="11" FontWeight="Bold" Foreground="#FF95A5A6" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding AdcModeText}" FontSize="15" FontWeight="SemiBold" Foreground="#FF2980B9"/>
+                        </StackPanel>
+
+                        <Separator Grid.Column="3" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0" Height="25"/>
+
+                        <!-- Integrity -->
+                        <StackPanel Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="INTEGRITY" FontSize="11" FontWeight="Bold" Foreground="#FF95A5A6" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding CalStatusText}" FontSize="15" FontWeight="SemiBold" Foreground="#FF27AE60"/>
+                        </StackPanel>
+
+                        <Separator Grid.Column="5" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0" Height="25"/>
+
+                        <!-- Tare -->
+                        <StackPanel Grid.Column="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="TARE STATUS" FontSize="11" FontWeight="Bold" Foreground="#FF95A5A6" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding TareStatusText}" FontSize="15" FontWeight="Bold" Foreground="#FF2C3E50"/>
+                        </StackPanel>
+
+                        <Separator Grid.Column="7" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0" Height="25"/>
+
+                        <!-- Raw ADC -->
+                        <StackPanel Grid.Column="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="RAW ADC" FontSize="11" FontWeight="Bold" Foreground="#FF95A5A6" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding RawAdcText}" FontSize="15" FontWeight="Bold" Foreground="#FF2980B9"/>
+                        </StackPanel>
+
+                        <Separator Grid.Column="9" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="10,0" Height="25"/>
+
+                        <!-- Peak (Brake Mode Only) -->
+                        <StackPanel Grid.Column="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="PEAK" FontSize="11" FontWeight="Bold" Foreground="#FF95A5A6" HorizontalAlignment="Center" Margin="0,0,0,2"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding PeakWeightText}" FontSize="15" FontWeight="Bold" Foreground="#FFDC3545" Margin="0,0,5,0"/>
+                                <Button Content="↻" Command="{Binding ResetPeakCommand}" 
+                                        ToolTip="Reset Peak"
+                                        Background="Transparent" BorderThickness="0" 
+                                        Foreground="#FF7F8C8D" Cursor="Hand"
+                                        FontSize="14" FontWeight="Bold" Padding="2,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Foreground" Value="#FFDC3545"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>
+
