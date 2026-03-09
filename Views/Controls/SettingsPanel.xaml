@@ -272,9 +272,9 @@
 
                         <GroupBox Header="About">
                             <StackPanel>
-                                <TextBlock Text="ATS Two-Wheeler WPF Interface" FontWeight="Bold"/>
-                                <TextBlock Text="Version: 1.2.0-MVP" Foreground="Gray"/>
-                                <TextBlock Text="Restore Legacy UI Project" Foreground="Gray" FontStyle="Italic"/>
+                                <TextBlock Text="ATS-WPF Interface" FontWeight="Bold"/>
+                                <TextBlock Text="Version: 0.1.0" Foreground="Gray"/>
+                                <TextBlock Text="Unified Application Architecture" Foreground="Gray" FontStyle="Italic"/>
                             </StackPanel>
                         </GroupBox>
                     </StackPanel>

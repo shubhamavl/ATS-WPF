@@ -16,7 +16,7 @@ namespace ATS_WPF.Models
     public class AppSettings
     {
         public VehicleMode VehicleMode { get; set; } = VehicleMode.TwoWheeler;
-        public string ComPort { get; set; } = string.Empty; // Legacy / TwoWheeler
+        public string ComPort { get; set; } = string.Empty; // Default / TwoWheeler
         public string LeftComPort { get; set; } = string.Empty; // HMV
         public string RightComPort { get; set; } = string.Empty; // HMV
         public TransmissionRate TransmissionRate { get; set; } = TransmissionRate.Hz1000; // Default 1kHz sampling

@@ -333,9 +333,9 @@ namespace ATS_WPF.Services
         }
 
         /// <summary>
-        /// Set efficiency limits for Pass/Fail validation (removed for ATS Two-Wheeler system)
+        /// Set efficiency limits for Pass/Fail validation (removed for ATS-WPF tracking system)
         /// </summary>
-        // Suspension-specific methods removed for ATS Two-Wheeler system
+        // Suspension-specific methods removed for ATS-WPF system
 
         // Implementation of added ISettingsService members
         public LinearCalibration GetCalibrationDataInternal(AxleType axleType) => LinearCalibration.LoadFromFile(axleType, AdcMode.InternalWeight, SystemMode.Weight) ?? new LinearCalibration { IsValid = false };

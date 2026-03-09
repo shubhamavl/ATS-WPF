@@ -86,7 +86,8 @@ namespace ATS_WPF.Services
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             string logsDir = PathHelper.GetLogsDirectory(); // Portable: relative to executable
 
-            _logFilePath = Path.Combine(logsDir, $"two_wheeler_log_{timestamp}.txt");
+            string vehicleModeStr = SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
+            _logFilePath = Path.Combine(logsDir, $"ats_wpf_{vehicleModeStr}_log_{timestamp}.txt");
         }
 
         /// <summary>
@@ -184,7 +185,7 @@ namespace ATS_WPF.Services
             try
             {
                 var sb = new StringBuilder();
-                sb.AppendLine("ATS Two-Wheeler System Log Export");
+                sb.AppendLine("ATS-WPF Weight System Log Export");
                 sb.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                 sb.AppendLine("=" + new string('=', 50));
 

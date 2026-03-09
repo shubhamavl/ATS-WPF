@@ -105,11 +105,12 @@ namespace ATS_WPF.ViewModels
         {
             try
             {
+                string vehicleModeStr = _systemManager.CurrentMode.ToString().ToLower();
                 var saveDialog = new SaveFileDialog
                 {
                     Filter = "CSV files (*.csv)|*.csv|All files (*.*)|*.*",
                     DefaultExt = "csv",
-                    FileName = $"two_wheeler_export_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
+                    FileName = $"ats_wpf_{vehicleModeStr}_export_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
                 };
 
                 if (saveDialog.ShowDialog() == true)

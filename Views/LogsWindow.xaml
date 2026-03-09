@@ -6,7 +6,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="ATS Two-Wheeler Weight Measurement System Monitor - Production Logs" Height="600" Width="1000" 
+        Title="ATS-WPF Weight System - Production Logs" Height="600" Width="1000" 
         MinWidth="800" MinHeight="500" MaxWidth="2000" MaxHeight="1200"
         WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
         Background="#FFF5F5F5" Icon="pack://application:,,,/Assets/AVL_Icon.ico">

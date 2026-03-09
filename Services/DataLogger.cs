@@ -77,7 +77,8 @@ namespace ATS_WPF.Services
                     {
                         System.Diagnostics.Debug.WriteLine($"Access denied creating log directory: {ex.Message}");
                     }
-                    _logFilePath = Path.Combine(baseDir, $"two_wheeler_log_{timestamp}.csv");
+                    string vehicleModeStr = SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
+                    _logFilePath = Path.Combine(baseDir, $"ats_wpf_{vehicleModeStr}_log_{timestamp}.csv");
 
                     // Create CSV header with system status fields
                     string header = "Timestamp,Side,RawADC,CalibratedKg,TaredKg,TareBaseline,CalSlope,CalIntercept,ADCMode,SystemStatus,ErrorFlags,Relay,CanHz,AdcHz,Uptime,FirmwareVersion,StatusTimestamp";

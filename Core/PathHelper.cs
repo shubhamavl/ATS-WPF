@@ -98,9 +98,10 @@ namespace ATS_WPF.Core
         /// <param name="axleType">The type of the axle (e.g. Total, Left, Right)</param>
         public static string GetCalibrationPath(Models.AxleType axleType, Models.AdcMode adcMode, Models.SystemMode systemMode = Models.SystemMode.Weight)
         {
+            string vehicleMode = Services.SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
             string modeSuffix = adcMode == Models.AdcMode.InternalWeight ? "internal" : "ads1115";
             string typeSuffix = systemMode == Models.SystemMode.Brake ? "_brake" : "";
-            return Path.Combine(GetDataDirectory(), $"calibration_{axleType.ToString().ToLower()}_{modeSuffix}{typeSuffix}.json");
+            return Path.Combine(GetDataDirectory(), $"calibration_{vehicleMode}_{axleType.ToString().ToLower()}_{modeSuffix}{typeSuffix}.json");
         }
 
         /// <summary>
@@ -108,7 +109,8 @@ namespace ATS_WPF.Core
         /// </summary>
         public static string GetTareConfigPath(Models.AxleType axleType)
         {
-            return Path.Combine(GetDataDirectory(), $"tare_{axleType.ToString().ToLower()}_config.json");
+            string vehicleMode = Services.SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
+            return Path.Combine(GetDataDirectory(), $"tare_{vehicleMode}_{axleType.ToString().ToLower()}_config.json");
         }
 
         /// <summary>
