@@ -52,6 +52,11 @@ namespace ATS_WPF
                 }
             };
 
+            // Initialize System Manager early to populate nodes for legacy ICANService bridge
+            var systemManager = ServiceProvider.GetRequiredService<SystemManager>();
+            var settings = ServiceProvider.GetRequiredService<ISettingsService>();
+            systemManager.Initialize(settings.Settings.VehicleMode);
+
             // Resolve and show MainWindow
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();

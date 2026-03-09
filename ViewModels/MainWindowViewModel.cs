@@ -107,7 +107,6 @@ namespace ATS_WPF.ViewModels
             _navigationService = navigationService;
 
             // Initialize SystemManager with configured vehicle mode
-            _systemManager.Initialize(_settings.Settings.VehicleMode);
 
             // Child ViewModels
             Connection = new ConnectionViewModel(_systemManager, settings);

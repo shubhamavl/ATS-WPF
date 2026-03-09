@@ -30,20 +30,6 @@ namespace ATS_WPF.Services
         }
 
 
-        public void ShowWeightTestWindow()
-        {
-            var canService = ServiceRegistry.GetService<ICANService>();
-            var weightProcessor = ServiceRegistry.GetService<IWeightProcessorService>();
-            var dataLogger = ServiceRegistry.GetService<IDataLoggerService>();
-            var settings = ServiceRegistry.GetService<ISettingsService>();
-            var dialogService = ServiceRegistry.GetService<IDialogService>();
-
-            var vm = new WeightTestViewModel(canService, weightProcessor, dataLogger, settings, dialogService);
-            var win = new WeightTestWindow(canService, weightProcessor);
-            win.DataContext = vm;
-            win.Owner = Application.Current.MainWindow;
-            win.Show();
-        }
 
         public void ShowCalibrationDialog(bool isBrakeMode = false)
         {
