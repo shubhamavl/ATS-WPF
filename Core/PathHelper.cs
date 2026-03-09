@@ -16,7 +16,7 @@ namespace ATS_WPF.Core
         {
             get
             {
-                return @"C:\ProgramData\ATS_TwoWheeler";
+                return @"C:\ProgramData\ATS_WPF";
             }
         }
 
@@ -87,7 +87,7 @@ namespace ATS_WPF.Core
         /// </summary>
         public static string GetUpdaterExecutablePath()
         {
-            return Path.Combine(ApplicationDirectory, "ATS_TwoWheeler_Updater.exe");
+            return Path.Combine(ApplicationDirectory, "ATS_Updater.exe");
         }
 
         /// <summary>

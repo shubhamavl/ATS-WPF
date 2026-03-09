@@ -107,7 +107,6 @@ namespace ATS_WPF
 
             // ViewModels
             services.AddTransient<ATS_WPF.ViewModels.ConnectionViewModel>();
-            services.AddTransient<ATS_WPF.ViewModels.TwoWheelerWeightViewModel>();
             services.AddTransient<ATS_WPF.ViewModels.SettingsViewModel>();
             services.AddTransient<ATS_WPF.ViewModels.BootloaderViewModel>();
             services.AddTransient<ATS_WPF.ViewModels.LogsViewModel>();

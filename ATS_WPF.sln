@@ -5,7 +5,7 @@ VisualStudioVersion = 17.14.36327.8 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATS_WPF", "ATS_WPF.csproj", "{4F036A03-EE59-B84B-6296-52A700196A02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATS_TwoWheeler_Updater", "ATS_TwoWheeler_Updater\\ATS_TwoWheeler_Updater.csproj", "{D6F0F6E8-1C7A-4B92-9F21-6E0C4D70F5B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ATS_Updater", "ATS_Updater\ATS_Updater.csproj", "{D6F0F6E8-1C7A-4B92-9F21-6E0C4D70F5B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

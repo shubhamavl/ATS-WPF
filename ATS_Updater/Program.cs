@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Threading;
 
-namespace ATS_TwoWheeler_Updater
+namespace ATS_Updater
 {
     internal static class Program
     {
@@ -21,7 +21,7 @@ namespace ATS_TwoWheeler_Updater
         {
             if (args.Length < 3)
             {
-                Console.Error.WriteLine("Usage: ATS_TwoWheeler_Updater <targetDir> <packagePath> <mainExeName>");
+                Console.Error.WriteLine("Usage: ATS_Updater <targetDir> <packagePath> <mainExeName>");
                 return 1;
             }
 
@@ -118,7 +118,7 @@ namespace ATS_TwoWheeler_Updater
         private static void ApplyZipUpdate(string targetDir, string zipPath)
         {
             // Extract ZIP to a temporary directory first
-            string tempDir = Path.Combine(Path.GetTempPath(), "ATS_TwoWheeler_Update_" + Guid.NewGuid().ToString("N"));
+            string tempDir = Path.Combine(Path.GetTempPath(), "ATS_WPF_Update_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempDir);
 
             try
@@ -154,7 +154,7 @@ namespace ATS_TwoWheeler_Updater
                 var fileName = Path.GetFileName(file);
 
                 // Avoid copying the updater onto itself if we are backing up
-                if (excludeUpdater && fileName.Equals("ATS_TwoWheeler_Updater.exe", StringComparison.OrdinalIgnoreCase))
+                if (excludeUpdater && fileName.Equals("ATS_Updater.exe", StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }

@@ -1,7 +1,7 @@
-# ATS Two-Wheeler UI User Guide
+# ATS-WPF Weight System User Guide
 
 ## 1. Overview
-The ATS Two-Wheeler UI is a powerful real-time dashboard for measuring weight and brake force. It handles high-speed data from the STM32 via CAN bus and provides advanced tools for calibration and logging.
+The ATS-WPF Weight System is a powerful real-time dashboard for measuring weight and brake force. It handles high-speed data from the STM32 via CAN bus and provides advanced tools for calibration and logging.
 
 - **Developer Note**: Built with C# WPF (MVVM). Handles up to 1kHz CAN data streams with persistent logic for calibration and diagnostic monitoring.
 

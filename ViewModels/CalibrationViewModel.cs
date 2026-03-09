@@ -56,7 +56,6 @@ namespace ATS_WPF.ViewModels
         public ICommand ResetTareCommand { get; }
         public ICommand SwitchSystemModeCommand { get; }
         public ICommand SwitchAdcModeCommand { get; }
-        public ICommand OpenTwoWheelerCommand { get; }
         public ICommand OpenBootloaderCommand { get; }
         public ICommand OpenMonitorCommand { get; }
         public ICommand OpenLogsCommand { get; }
@@ -79,7 +78,6 @@ namespace ATS_WPF.ViewModels
             ResetTareCommand = new RelayCommand(OnResetTare);
             SwitchSystemModeCommand = new RelayCommand(OnSwitchSystemMode);
             SwitchAdcModeCommand = new RelayCommand(OnSwitchAdcMode);
-            OpenTwoWheelerCommand = new RelayCommand(OnOpenTwoWheeler);
             OpenBootloaderCommand = new RelayCommand(OnOpenBootloader);
             OpenMonitorCommand = new RelayCommand(OnOpenMonitor);
             OpenLogsCommand = new RelayCommand(OnOpenLogs);
@@ -131,10 +129,6 @@ namespace ATS_WPF.ViewModels
             }
         }
 
-        private void OnOpenTwoWheeler(object? parameter)
-        {
-            _navigationService.ShowTwoWheelerWindow();
-        }
 
         private void OnOpenBootloader(object? parameter)
         {

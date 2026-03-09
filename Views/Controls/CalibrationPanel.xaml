@@ -71,9 +71,6 @@
                 Style="{StaticResource DangerButton}" 
                 Height="44" Width="110" FontSize="13" Margin="3,0"/>
                 
-        <Button Content="🚗 Two Wheeler" Command="{Binding OpenTwoWheelerCommand}"
-                Style="{StaticResource ModernButton}" Background="#FF27AE60" 
-                Height="44" Width="165" FontSize="13" Margin="4,0"/>
     </StackPanel>
 </UserControl>
 

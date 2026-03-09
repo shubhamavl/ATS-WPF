@@ -7,7 +7,7 @@ echo Building portable version (includes .NET runtime - no installation needed).
 echo.
 
 REM 1) Build main WPF application (portable, single-file)
-dotnet publish ATS_TwoWheeler_WPF.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true
+dotnet publish ATS_WPF.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -20,7 +20,7 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 REM 2) Build external updater helper (also self-contained single-file)
-dotnet publish ATS_TwoWheeler_Updater\ATS_TwoWheeler_Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true
+dotnet publish ATS_Updater\ATS_Updater.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true
 
 if %ERRORLEVEL% NEQ 0 (
     echo.
@@ -33,10 +33,10 @@ if %ERRORLEVEL% NEQ 0 (
 
 REM 3) Copy updater EXE into main publish folder so auto-update can find it
 set PUBLISH_DIR=bin\Release\net8.0-windows\win-x64\publish
-set UPDATER_PUBLISH=ATS_TwoWheeler_Updater\bin\Release\net8.0-windows\win-x64\publish
+set UPDATER_PUBLISH=ATS_Updater\bin\Release\net8.0-windows\win-x64\publish
 
-if exist "%UPDATER_PUBLISH%\ATS_TwoWheeler_Updater.exe" (
-    copy /Y "%UPDATER_PUBLISH%\ATS_TwoWheeler_Updater.exe" "%PUBLISH_DIR%\ATS_TwoWheeler_Updater.exe" >nul
+if exist "%UPDATER_PUBLISH%\ATS_Updater.exe" (
+    copy /Y "%UPDATER_PUBLISH%\ATS_Updater.exe" "%PUBLISH_DIR%\ATS_Updater.exe" >nul
 )
 
 echo.

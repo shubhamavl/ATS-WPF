@@ -16,9 +16,9 @@
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishTrimmed>false</PublishTrimmed>
     <!-- Application version used by auto-update (also reflected in GitHub release tags) -->
-    <Version>0.3.1</Version>
-    <AssemblyVersion>0.3.1.0</AssemblyVersion>
-    <FileVersion>0.3.1.0</FileVersion>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
     <RootNamespace>ATS_WPF</RootNamespace>
     <AssemblyName>ATS_WPF</AssemblyName>
     <!-- Suppress NU1701 warnings for packages that target .NET Framework but work fine on .NET 8 -->
@@ -51,12 +51,12 @@
     </Resource>
   </ItemGroup>
 
-  <!-- Exclude ATS_TwoWheeler_Updater directory from compilation (it's a separate project) -->
+  <!-- Exclude ATS_Updater directory from compilation (it's a separate project) -->
   <ItemGroup>
-    <Compile Remove="ATS_TwoWheeler_Updater\**" />
-    <Content Remove="ATS_TwoWheeler_Updater\**" />
-    <EmbeddedResource Remove="ATS_TwoWheeler_Updater\**" />
-    <None Remove="ATS_TwoWheeler_Updater\**" />
+    <Compile Remove="ATS_Updater\**" />
+    <Content Remove="ATS_Updater\**" />
+    <EmbeddedResource Remove="ATS_Updater\**" />
+    <None Remove="ATS_Updater\**" />
     
     <!-- Exclude Tests -->
     <Compile Remove="ATS_WPF.Tests\**" />
