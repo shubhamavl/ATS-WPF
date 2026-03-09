@@ -14,6 +14,7 @@ namespace ATS_WPF.Core
         void DisconnectAll();
         void StartStreamAll();
         void StopStreamAll();
+        void SetVehicleMode(VehicleMode mode);
         void SetBrakeModeAll(bool isBrakeMode);
     }
 }

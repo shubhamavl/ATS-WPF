@@ -17,9 +17,6 @@ namespace ATS_WPF.Core
             _provider = provider;
         }
 
-        /// <summary>
-        /// Get a service instance
-        /// </summary>
         public static T GetService<T>() where T : class
         {
             if (_provider == null)
@@ -28,19 +25,6 @@ namespace ATS_WPF.Core
             }
             
             return _provider.GetRequiredService<T>();
-        }
-        
-        /// <summary>
-        /// DEPRECATED: Does nothing now as initialization is handled by App.xaml.cs
-        /// </summary>
-        public static void InitializeDefaultServices()
-        {
-            // No-op
-        }
-
-        public static void Cleanup()
-        {
-            // Handled by DI container disposal if needed
         }
     }
 }

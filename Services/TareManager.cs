@@ -14,19 +14,18 @@ namespace ATS_WPF.Services
     /// </summary>
     public class TareManager
     {
-        // Total weight offsets (negative values from calibrator removal)
-        public double TotalOffsetKgInternal { get; private set; }
-        public double TotalOffsetKgADS1115 { get; private set; }
-        public bool TotalIsTaredInternal { get; private set; }
-        public bool TotalIsTaredADS1115 { get; private set; }
-        public DateTime TotalTareTimeInternal { get; private set; }
-        public DateTime TotalTareTimeADS1115 { get; private set; }
+        private readonly Dictionary<AdcMode, TareEntry> _tareEntries = new();
         
         private readonly AxleType _type;
+
+        public record TareEntry(double OffsetKg, bool IsTared, DateTime TareTime);
 
         public TareManager(AxleType type)
         {
             _type = type;
+            // Initialize with empty entries
+            _tareEntries[AdcMode.InternalWeight] = new TareEntry(0, false, DateTime.MinValue);
+            _tareEntries[AdcMode.Ads1115] = new TareEntry(0, false, DateTime.MinValue);
         }
 
         /// <summary>
@@ -44,29 +43,8 @@ namespace ATS_WPF.Services
                 throw new ArgumentException($"Invalid tare offset: {currentCalibratedKg} (NaN or Infinity)", nameof(currentCalibratedKg));
             }
 
-            // Only allow negative values (calibrator removed scenario)
-            if (currentCalibratedKg >= 0)
-            {
-                throw new ArgumentException($"Tare only works with negative weight (calibrator removed). Current weight: {currentCalibratedKg:F3} kg", nameof(currentCalibratedKg));
-            }
-
-            // Store the absolute value (positive) as offset for compensation
-            double offset = Math.Abs(currentCalibratedKg);
-
-            if (adcMode == AdcMode.InternalWeight) // Internal
-            {
-                TotalOffsetKgInternal = offset; // Store positive offset
-                TotalIsTaredInternal = true;
-                TotalTareTimeInternal = DateTime.Now;
-                System.Diagnostics.Debug.WriteLine($"[TareManager] Total Internal tare set: offset=+{offset:F3} kg (from {currentCalibratedKg:F3} kg)");
-            }
-            else // ADS1115
-            {
-                TotalOffsetKgADS1115 = offset; // Store positive offset
-                TotalIsTaredADS1115 = true;
-                TotalTareTimeADS1115 = DateTime.Now;
-                System.Diagnostics.Debug.WriteLine($"[TareManager] Total ADS1115 tare set: offset=+{offset:F3} kg (from {currentCalibratedKg:F3} kg)");
-            }
+            _tareEntries[adcMode] = new TareEntry(currentCalibratedKg, true, DateTime.Now);
+            System.Diagnostics.Debug.WriteLine($"[TareManager] Total {adcMode} tare set: offset={currentCalibratedKg:F3} kg");
         }
 
         /// <summary>
@@ -75,16 +53,7 @@ namespace ATS_WPF.Services
         /// <param name="adcMode">ADC mode (0=Internal, 1=ADS1115)</param>
         public void ResetTotal(AdcMode adcMode)
         {
-            if (adcMode == AdcMode.InternalWeight) // Internal
-            {
-                TotalIsTaredInternal = false;
-                TotalOffsetKgInternal = 0;
-            }
-            else // ADS1115
-            {
-                TotalIsTaredADS1115 = false;
-                TotalOffsetKgADS1115 = 0;
-            }
+            _tareEntries[adcMode] = new TareEntry(0, false, DateTime.MinValue);
         }
 
         /// <summary>
@@ -106,32 +75,14 @@ namespace ATS_WPF.Services
         /// <returns>Compensated weight (calibrated + offset, where offset is positive)</returns>
         public double ApplyTare(double calibratedKg, AdcMode adcMode)
         {
-            double offset = 0;
-            bool isTared = false;
-
-            if (adcMode == AdcMode.InternalWeight) // Internal
+            if (_tareEntries.TryGetValue(adcMode, out var entry) && entry.IsTared)
             {
-                offset = TotalOffsetKgInternal;
-                isTared = TotalIsTaredInternal;
-            }
-            else // ADS1115
-            {
-                offset = TotalOffsetKgADS1115;
-                isTared = TotalIsTaredADS1115;
-            }
-
-            if (isTared)
-            {
-                // Add positive offset to compensate for calibrator removal
-                // Offset is stored as positive value (absolute of negative weight)
-                double compensatedWeight = calibratedKg + offset;
-                System.Diagnostics.Debug.WriteLine($"[TareManager] ApplyTare: mode={(adcMode == 0 ? "Internal" : "ADS1115")}, calibrated={calibratedKg:F3} kg, offset=+{offset:F3} kg, result={compensatedWeight:F3} kg");
+                double compensatedWeight = calibratedKg + entry.OffsetKg;
+                System.Diagnostics.Debug.WriteLine($"[TareManager] ApplyTare: mode={adcMode}, calibrated={calibratedKg:F3} kg, offset={entry.OffsetKg:F3} kg, result={compensatedWeight:F3} kg");
                 return compensatedWeight;
             }
-            else
-            {
-                return calibratedKg; // Not tared, return as-is
-            }
+
+            return calibratedKg;
         }
 
         /// <summary>
@@ -141,7 +92,7 @@ namespace ATS_WPF.Services
         /// <returns>True if tared</returns>
         public bool IsTared(AdcMode adcMode)
         {
-            return adcMode == AdcMode.InternalWeight ? TotalIsTaredInternal : TotalIsTaredADS1115;
+            return _tareEntries.TryGetValue(adcMode, out var entry) && entry.IsTared;
         }
 
         /// <summary>
@@ -151,7 +102,7 @@ namespace ATS_WPF.Services
         /// <returns>Offset weight in kg (positive value, stored as absolute of negative weight)</returns>
         public double GetOffsetKg(AdcMode adcMode)
         {
-            return adcMode == AdcMode.InternalWeight ? TotalOffsetKgInternal : TotalOffsetKgADS1115;
+            return _tareEntries.TryGetValue(adcMode, out var entry) ? entry.OffsetKg : 0;
         }
 
         /// <summary>
@@ -161,7 +112,7 @@ namespace ATS_WPF.Services
         /// <returns>Tare time or DateTime.MinValue if not tared</returns>
         public DateTime GetTareTime(AdcMode adcMode)
         {
-            return adcMode == AdcMode.InternalWeight ? TotalTareTimeInternal : TotalTareTimeADS1115;
+            return _tareEntries.TryGetValue(adcMode, out var entry) ? entry.TareTime : DateTime.MinValue;
         }
 
         /// <summary>
@@ -208,14 +159,7 @@ namespace ATS_WPF.Services
         {
             var tareData = new TareData
             {
-                // Total weight offsets
-                TotalOffsetKgInternal = TotalOffsetKgInternal,
-                TotalOffsetKgADS1115 = TotalOffsetKgADS1115,
-                TotalIsTaredInternal = TotalIsTaredInternal,
-                TotalIsTaredADS1115 = TotalIsTaredADS1115,
-                TotalTareTimeInternal = TotalTareTimeInternal,
-                TotalTareTimeADS1115 = TotalTareTimeADS1115,
-
+                Entries = new Dictionary<AdcMode, TareEntry>(_tareEntries),
                 SaveTime = DateTime.Now
             };
 
@@ -241,15 +185,12 @@ namespace ATS_WPF.Services
                 string jsonString = File.ReadAllText(path);
                 var tareData = JsonSerializer.Deserialize<TareData>(jsonString);
 
-                if (tareData != null)
+                if (tareData?.Entries != null)
                 {
-                    // Load offsets
-                    TotalOffsetKgInternal = tareData.TotalOffsetKgInternal;
-                    TotalOffsetKgADS1115 = tareData.TotalOffsetKgADS1115;
-                    TotalIsTaredInternal = tareData.TotalIsTaredInternal;
-                    TotalIsTaredADS1115 = tareData.TotalIsTaredADS1115;
-                    TotalTareTimeInternal = tareData.TotalTareTimeInternal;
-                    TotalTareTimeADS1115 = tareData.TotalTareTimeADS1115;
+                    foreach (var entry in tareData.Entries)
+                    {
+                        _tareEntries[entry.Key] = entry.Value;
+                    }
 
                     return true;
                 }
@@ -295,14 +236,7 @@ namespace ATS_WPF.Services
     /// </summary>
     public class TareData
     {
-        // Mode-specific offsets for total weight
-        public double TotalOffsetKgInternal { get; set; }
-        public double TotalOffsetKgADS1115 { get; set; }
-        public bool TotalIsTaredInternal { get; set; }
-        public bool TotalIsTaredADS1115 { get; set; }
-        public DateTime TotalTareTimeInternal { get; set; }
-        public DateTime TotalTareTimeADS1115 { get; set; }
-
+        public Dictionary<AdcMode, TareManager.TareEntry>? Entries { get; set; }
         public DateTime SaveTime { get; set; }
     }
 }

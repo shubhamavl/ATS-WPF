@@ -7,7 +7,7 @@ using ATS_WPF.Services.Interfaces;
 
 namespace ATS_WPF.Core
 {
-    public class SystemManager : ISystemManager
+    public class SystemManager : ISystemManager, IDisposable
     {
         private readonly List<CANNode> _nodes = new();
         private readonly List<AxleSystem> _axles = new();
@@ -22,7 +22,6 @@ namespace ATS_WPF.Core
         {
             _settingsService = settingsService;
             _dataLogger = dataLogger;
-            Initialize(_settingsService.Settings.VehicleMode);
         }
 
         public void Initialize(VehicleMode mode)
@@ -80,7 +79,7 @@ namespace ATS_WPF.Core
             var tareManager = new TareManager(axleType);
             tareManager.LoadFromFile(); // Will need update to support separate files
 
-            var weightProcessor = new WeightProcessor(axleType, CurrentMode, node.CanService, tareManager, _dataLogger);
+            var weightProcessor = new WeightProcessor(axleType, CurrentMode, node.CanService, tareManager, _settingsService, _dataLogger);
             
             return new AxleSystem(axleType, node, tareManager, weightProcessor);
         }
@@ -111,7 +110,7 @@ namespace ATS_WPF.Core
                 var config = new UsbSerialCanAdapterConfig
                 {
                     PortName = port,
-                    BitrateKbps = 250,
+                    BitrateKbps = (ushort)_settingsService.Settings.CanBaudRate, // Correctly use settings
                     SerialBaudRate = 2000000
                 };
                 
@@ -185,6 +184,11 @@ namespace ATS_WPF.Core
             {
                 node.CanService.SwitchSystemMode(isBrakeMode ? SystemMode.Brake : SystemMode.Weight);
             }
+        }
+
+        public void Dispose()
+        {
+            DisconnectAll();
         }
     }
 }

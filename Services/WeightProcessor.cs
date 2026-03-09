@@ -30,13 +30,13 @@ namespace ATS_WPF.Services
         private readonly ConcurrentQueue<RawWeightData> _rawDataQueue = new();
 
         // Output: Latest processed data (lock-free)
-        private volatile ProcessedWeightData _latestTotal = new();
+        private volatile ProcessedWeightData _latestTotal = new(0, 0, 0, 0, DateTime.MinValue);
 
         // Calibration references (immutable after set)
         // Calibration references (immutable after set)
         private LinearCalibration? _internalCalibration;
         private LinearCalibration? _ads1115Calibration;
-        private SettingsManager _settingsManager = SettingsManager.Instance;
+        private readonly ISettingsService _settingsService;
         private bool _isBrakeMode = false;
         private TareManager? _tareManager;
         private readonly IDataLoggerService _dataLogger;
@@ -91,11 +91,12 @@ namespace ATS_WPF.Services
             }
         }
 
-        public WeightProcessor(AxleType axleType, VehicleMode vehicleMode, ICANService canService, TareManager tareManager, IDataLoggerService dataLogger)
+        public WeightProcessor(AxleType axleType, VehicleMode vehicleMode, ICANService canService, TareManager tareManager, ISettingsService settingsService, IDataLoggerService dataLogger)
         {
             _axleType = axleType;
             _vehicleMode = vehicleMode;
             _tareManager = tareManager;
+            _settingsService = settingsService;
             _dataLogger = dataLogger;
 
             // Subscribe to raw data from CAN service
@@ -128,7 +129,7 @@ namespace ATS_WPF.Services
             LoadFilterSettings();
             
             // Subscribe to settings changes
-            _settingsManager.SettingsChanged += (s, e) => LoadFilterSettings();
+            _settingsService.SettingsChanged += (s, e) => LoadFilterSettings();
         }
 
         private bool IsStreamForThisAxle(RawDataEventArgs e)
@@ -137,19 +138,16 @@ namespace ATS_WPF.Services
             if (_vehicleMode != VehicleMode.LMV) return true;
 
             // LMV shares one CANNode and switches between Left/Right streams.
-            // But we actually need to look at if `e` has an stream identifier like CAN ID.
-            // Currently RawDataEventArgs doesn't expose the original CAN ID. 
-            // In the short-term, assume `IsStreamForThisAxle` works with the ID from CANService.
-            // NOTE: We need to augment CANService to expose the origin CAN ID or side in RawDataEventArgs
-            
-            // To be implemented: Stream ID check based on e.CanId 
             // 0x200 -> Left, 0x201 -> Right
-            return e.SideTag == _axleType.ToString() || string.IsNullOrEmpty(e.SideTag);
+            if (_axleType == AxleType.Left) return e.CanId == CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA;
+            if (_axleType == AxleType.Right) return e.CanId == CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA_RIGHT;
+
+            return false;
         }
 
         private void LoadFilterSettings()
         {
-            var settings = _settingsManager.Settings;
+            var settings = _settingsService.Settings;
             ConfigureFilter(settings.FilterType, settings.FilterAlpha, settings.FilterWindowSize, settings.FilterEnabled);
         }
 
@@ -300,17 +298,9 @@ namespace ATS_WPF.Services
                 return; // Drop oldest data
             }
 
-            _rawDataQueue.Enqueue(new RawWeightData
-            {
-                // Side removed from model
-                RawADC = rawADC,  // Can be signed (ADS1115) or unsigned (Internal)
-                Timestamp = DateTime.Now
-            });
+            _rawDataQueue.Enqueue(new RawWeightData(rawADC, DateTime.Now));
         }
 
-        /// <summary>
-        /// Processing thread - runs continuously
-        /// </summary>
         /// <summary>
         /// Processing thread - runs continuously
         /// </summary>
@@ -350,47 +340,51 @@ namespace ATS_WPF.Services
         /// <param name="raw">Raw weight data packet containing ADC value and timestamp</param>
         private void ProcessRawData(RawWeightData raw)
         {
-            var processed = new ProcessedWeightData
-            {
-                RawADC = raw.RawADC,
-                Timestamp = raw.Timestamp
-            };
-
             // Apply calibration (fast floating-point math)
             // Select calibration based on current ADC mode
             var calibration = _totalADCMode == AdcMode.InternalWeight ? _internalCalibration : _ads1115Calibration;
 
+            double calibratedWeight = 0;
+            double taredWeight = 0;
+            double tareValue = 0;
+
             if (calibration?.IsValid == true)
             {
-                double calibratedWeight = calibration.RawToKg(raw.RawADC);
+                calibratedWeight = calibration.RawToKg(raw.RawADC);
 
                 // Apply filtering if enabled
                 if (_filterEnabled)
                 {
-                    processed.CalibratedWeight = ApplyFilter(calibratedWeight, true);
-                }
-                else
-                {
-                    processed.CalibratedWeight = calibratedWeight;
+                    calibratedWeight = ApplyFilter(calibratedWeight, true);
                 }
 
                 // Apply tare (mode-specific) - uses _totalADCMode which should match the calibration mode
-                double tareValue = _tareManager?.GetOffsetKg(_totalADCMode) ?? 0;
-                processed.TareValue = tareValue;
-                double taredWeight = _tareManager?.ApplyTare(processed.CalibratedWeight, _totalADCMode) ?? processed.CalibratedWeight;
+                tareValue = _tareManager?.GetOffsetKg(_totalADCMode) ?? 0;
+                taredWeight = _tareManager?.ApplyTare(calibratedWeight, _totalADCMode) ?? calibratedWeight;
 
                 // Apply filtering to tared weight if enabled
                 if (_filterEnabled)
                 {
-                    processed.TaredWeight = ApplyFilter(taredWeight, false);
-                }
-                else
-                {
-                    processed.TaredWeight = taredWeight;
+                    taredWeight = ApplyFilter(taredWeight, false);
                 }
             }
+            else
+            {
+                // No calibration valid
+                calibratedWeight = 0;
+                taredWeight = 0;
+                tareValue = 0;
+            }
 
-            _latestTotal = processed; // Atomic write
+            var processed = new ProcessedWeightData(
+                raw.RawADC,
+                calibratedWeight,
+                taredWeight,
+                tareValue,
+                raw.Timestamp
+            );
+
+            Interlocked.Exchange(ref _latestTotal, processed); // Thread-safe atomic write
 
             // Log data point if logging is active
             if (_dataLogger.IsLogging)
@@ -496,7 +490,7 @@ namespace ATS_WPF.Services
             }
 
             var latest = _latestTotal;
-            if (latest != null && latest.CalibratedWeight < 0)
+            if (latest != null)
             {
                 _tareManager.TareTotal(latest.CalibratedWeight, _totalADCMode);
                 ResetFilters();

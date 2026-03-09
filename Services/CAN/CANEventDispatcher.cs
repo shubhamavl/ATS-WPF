@@ -39,11 +39,11 @@ namespace ATS_WPF.Services.CAN
             switch (canId)
             {
                 case CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA: // 0x200
-                    HandleRawData(canData, "Left"); // Or Total
+                    HandleRawData(canId, canData, "Left"); // Or Total
                     break;
                     
                 case CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA_RIGHT: // 0x201
-                    HandleRawData(canData, "Right");
+                    HandleRawData(canId, canData, "Right");
                     break;
 
                 case CANMessageProcessor.CAN_MSG_ID_SYSTEM_STATUS: // 0x300
@@ -60,7 +60,7 @@ namespace ATS_WPF.Services.CAN
             }
         }
 
-        private void HandleRawData(byte[] canData, string sideTag)
+        private void HandleRawData(uint canId, byte[] canData, string sideTag)
         {
             if (_currentADCMode == AdcMode.InternalWeight) // Internal ADC
             {
@@ -70,6 +70,7 @@ namespace ATS_WPF.Services.CAN
                     RawDataReceived?.Invoke(this, new RawDataEventArgs
                     {
                         RawADCSum = rawADC,
+                        CanId = canId,
                         TimestampFull = DateTime.Now,
                         SideTag = sideTag
                     });
@@ -83,6 +84,7 @@ namespace ATS_WPF.Services.CAN
                     RawDataReceived?.Invoke(this, new RawDataEventArgs
                     {
                         RawADCSum = rawADC,
+                        CanId = canId,
                         TimestampFull = DateTime.Now,
                         SideTag = sideTag
                     });

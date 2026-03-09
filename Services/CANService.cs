@@ -605,7 +605,7 @@ namespace ATS_WPF.Services
         // Re-introduced for Multi-Vehicle architecture (specifically LMV)
         // to distinguish Left (0x200) vs Right (0x201) raw streams on a single bus
         public string SideTag { get; set; } = string.Empty; 
-
+        public uint CanId { get; set; }
         // Raw ADC sum: int to support both modes
         // - Internal ADC: unsigned 0-16380 (stored as int, treated as unsigned, 4x4095)
         // - ADS1115: signed -131072 to +131068 (4 channels)

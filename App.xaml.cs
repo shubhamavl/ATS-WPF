@@ -57,6 +57,21 @@ namespace ATS_WPF
             mainWindow.Show();
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            try
+            {
+                var mainWin = MainWindow as MainWindow;
+                if (mainWin?.DataContext is ATS_WPF.ViewModels.MainWindowViewModel vm)
+                {
+                    vm.Cleanup();
+                }
+            }
+            catch { /* Ignore errors on exit */ }
+
+            base.OnExit(e);
+        }
+
         private void ConfigureServices(IServiceCollection services)
         {
             // Infrastructure Services
@@ -77,14 +92,8 @@ namespace ATS_WPF
             // Weight & Tare are now managed dynamically per-Axle by SystemManager.
 
             // Bootloader Services
-            var canService = services.BuildServiceProvider().GetRequiredService<ICANService>(); // Circular dep workaround for simple DI plan, better to resolve in factory
-            
-            services.AddSingleton<BootloaderDiagnosticsService>();
-            services.AddSingleton<IBootloaderDiagnosticsService>(provider => provider.GetRequiredService<BootloaderDiagnosticsService>());
-            
-            // FirmwareUpdateService requires CANService
-            services.AddSingleton<FirmwareUpdateService>();
-            services.AddSingleton<IFirmwareUpdateService>(provider => provider.GetRequiredService<FirmwareUpdateService>());
+            services.AddSingleton<IBootloaderDiagnosticsService, BootloaderDiagnosticsService>();
+            services.AddSingleton<IFirmwareUpdateService, FirmwareUpdateService>();
 
             // Status Monitor
             services.AddSingleton<IStatusMonitorService>(provider => {
@@ -106,12 +115,6 @@ namespace ATS_WPF
 
             // Views
             services.AddSingleton<MainWindow>();
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            // Cleanup code here if needed
-            base.OnExit(e);
         }
     }
 }
