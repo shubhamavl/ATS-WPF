@@ -111,9 +111,10 @@
                             <ContextMenu>
                                 <MenuItem Header="Configuration Viewer" Command="{Binding OpenConfigViewerCommand}"/>
                                 <Separator/>
-                                <MenuItem Header="Bootloader Manager" Command="{Binding Calibration.OpenBootloaderCommand}"/>
-                                <MenuItem Header="Monitor Window" Command="{Binding Calibration.OpenMonitorCommand}"/>
-                                <MenuItem Header="Logs Window" Command="{Binding Calibration.OpenLogsCommand}"/>
+                                <MenuItem Header="Bootloader Manager" Command="{Binding OpenBootloaderCommand}"/>
+                                <MenuItem Header="Monitor Window" Command="{Binding OpenMonitorCommand}"/>
+                                <MenuItem Header="Logs Window" Command="{Binding OpenLogsCommand}"/>
+                                <MenuItem Header="Status History" Command="{Binding OpenStatusHistoryCommand}"/>
                             </ContextMenu>
                         </Button.ContextMenu>
                     </Button>

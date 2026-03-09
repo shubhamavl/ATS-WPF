@@ -83,6 +83,10 @@ namespace ATS_WPF.ViewModels
         // Commands
         public ICommand OpenSettingsCommand { get; }
         public ICommand OpenConfigViewerCommand { get; }
+        public ICommand OpenBootloaderCommand { get; }
+        public ICommand OpenMonitorCommand { get; }
+        public ICommand OpenLogsCommand { get; }
+        public ICommand OpenStatusHistoryCommand { get; }
         public ICommand StopAllCommand { get; }
         public ICommand SelectLeftAxleCommand { get; }
         public ICommand SelectRightAxleCommand { get; }
@@ -120,6 +124,10 @@ namespace ATS_WPF.ViewModels
             // Commands
             OpenSettingsCommand = new RelayCommand(_ => OnOpenSettings());
             OpenConfigViewerCommand = new RelayCommand(_ => OpenConfigViewerRequested?.Invoke());
+            OpenBootloaderCommand = new RelayCommand(_ => _navigationService.ShowBootloaderManager());
+            OpenMonitorCommand = new RelayCommand(_ => _navigationService.ShowMonitorWindow());
+            OpenLogsCommand = new RelayCommand(_ => _navigationService.ShowLogsWindow());
+            OpenStatusHistoryCommand = new RelayCommand(_ => _navigationService.ShowStatusHistory());
             StopAllCommand = new RelayCommand(OnStopAll);
             SelectLeftAxleCommand = new RelayCommand(_ => SelectAxle(AxleType.Left));
             SelectRightAxleCommand = new RelayCommand(_ => SelectAxle(AxleType.Right));
