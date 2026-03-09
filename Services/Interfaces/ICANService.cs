@@ -19,6 +19,7 @@ namespace ATS_WPF.Services.Interfaces
         event EventHandler<FirmwareVersionEventArgs>? FirmwareVersionReceived;
         event EventHandler<PerformanceMetricsEventArgs>? PerformanceMetricsReceived;
         event EventHandler<string>? DataTimeout;
+        event EventHandler<AxleType>? LmvStreamChanged;
 
         bool Connect(CanAdapterConfig config, out string errorMessage);
         void Disconnect();
@@ -28,6 +29,7 @@ namespace ATS_WPF.Services.Interfaces
         bool SwitchToInternalADC();
         bool SwitchToADS1115();
         bool SwitchSystemMode(SystemMode mode);
+        bool SelectLmvStream(AxleType side);
         bool RequestSystemStatus(bool log = true);
         bool RequestFirmwareVersion();
         void SetTimeout(TimeSpan timeout);

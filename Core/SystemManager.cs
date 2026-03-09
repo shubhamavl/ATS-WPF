@@ -140,13 +140,11 @@ namespace ATS_WPF.Core
         {
             if (CurrentMode == VehicleMode.LMV)
             {
-                // LMV: Start left (0x040) and right (0x041) streams on the single Main node
+                // LMV: Start main stream (0x040) on the single Main node. 
+                // Selection of left/right side (0x048) is handled sequentially in UI or WeightProcessor.
                 if (_nodes.Count > 0)
                 {
-                    // Start Left (0x040)
                     _nodes[0].CanService.StartStream(_settingsService.Settings.TransmissionRate, CANMessageProcessor.CAN_MSG_ID_START_STREAM);
-                    // Start Right (0x041)
-                    _nodes[0].CanService.StartStream(_settingsService.Settings.TransmissionRate, CANMessageProcessor.CAN_MSG_ID_START_STREAM_RIGHT);
                 }
             }
             else

@@ -26,6 +26,7 @@ namespace ATS_WPF.Services
     {
         private readonly AxleType _axleType;
         private readonly VehicleMode _vehicleMode;
+        private AxleType _confirmedLmvSide = AxleType.Left; // Track confirmed LMV stream side
         // Input queue: Raw ADC data from CAN thread
         private readonly ConcurrentQueue<RawWeightData> _rawDataQueue = new();
 
@@ -107,6 +108,11 @@ namespace ATS_WPF.Services
                 }
             };
 
+            // Subscribe to LMV stream changes (for sequential streaming)
+            canService.LmvStreamChanged += (s, side) => {
+                _confirmedLmvSide = side;
+            };
+
             // Subscribe to system status
             canService.SystemStatusReceived += (s, e) => {
                 SetADCMode(e.ADCMode);
@@ -138,11 +144,10 @@ namespace ATS_WPF.Services
             if (_vehicleMode != VehicleMode.LMV) return true;
 
             // LMV shares one CANNode and switches between Left/Right streams.
-            // 0x200 -> Left, 0x201 -> Right
-            if (_axleType == AxleType.Left) return e.CanId == CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA;
-            if (_axleType == AxleType.Right) return e.CanId == CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA_RIGHT;
+            // Both sides use 0x200, we filter based on confirmed side.
+            if (e.CanId != CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA) return false;
 
-            return false;
+            return _axleType == _confirmedLmvSide;
         }
 
         private void LoadFilterSettings()

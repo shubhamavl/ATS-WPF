@@ -47,6 +47,7 @@ namespace ATS_WPF.Services
         // CAN Message IDs - Refactored to CANMessageProcessor
         private const uint CAN_MSG_ID_TOTAL_RAW_DATA = CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA;
         private const uint CAN_MSG_ID_START_STREAM = CANMessageProcessor.CAN_MSG_ID_START_STREAM;
+        private const uint CAN_MSG_ID_SELECT_LMV_STREAM = CANMessageProcessor.CAN_MSG_ID_SELECT_LMV_STREAM;
         private const uint CAN_MSG_ID_STOP_ALL_STREAMS = CANMessageProcessor.CAN_MSG_ID_STOP_ALL_STREAMS;
         private const uint CAN_MSG_ID_SYSTEM_STATUS = CANMessageProcessor.CAN_MSG_ID_SYSTEM_STATUS;
         private const uint CAN_MSG_ID_SYS_PERF = CANMessageProcessor.CAN_MSG_ID_SYS_PERF;
@@ -56,6 +57,7 @@ namespace ATS_WPF.Services
         private const uint CAN_MSG_ID_VERSION_REQUEST = CANMessageProcessor.CAN_MSG_ID_VERSION_REQUEST;
         private const uint CAN_MSG_ID_SET_SYSTEM_MODE = CANMessageProcessor.CAN_MSG_ID_SET_SYSTEM_MODE;
         private const uint CAN_MSG_ID_VERSION_RESPONSE = CANMessageProcessor.CAN_MSG_ID_VERSION_RESPONSE;
+        private const uint CAN_MSG_ID_LMV_STREAM_CONFIRM = CANMessageProcessor.CAN_MSG_ID_LMV_STREAM_CONFIRM;
 
         // Bootloader protocol IDs (matching STM32 implementation)
         private const uint CAN_MSG_ID_BOOT_ENTER = BootloaderProtocol.CanIdBootEnter;
@@ -86,6 +88,7 @@ namespace ATS_WPF.Services
         public event EventHandler<SystemStatusEventArgs>? SystemStatusReceived;
         public event EventHandler<FirmwareVersionEventArgs>? FirmwareVersionReceived;
         public event EventHandler<PerformanceMetricsEventArgs>? PerformanceMetricsReceived;
+        public event EventHandler<AxleType>? LmvStreamChanged;
 
 
 
@@ -114,6 +117,7 @@ namespace ATS_WPF.Services
             };
             _eventDispatcher.FirmwareVersionReceived += (s, e) => FirmwareVersionReceived?.Invoke(this, e);
             _eventDispatcher.PerformanceMetricsReceived += (s, e) => PerformanceMetricsReceived?.Invoke(this, e);
+            _eventDispatcher.LmvStreamChanged += (s, e) => LmvStreamChanged?.Invoke(this, e);
             _eventDispatcher.DataTimeout += (s, e) => DataTimeout?.Invoke(this, e);
 
             // Initialize timeout from settings
@@ -539,6 +543,15 @@ namespace ATS_WPF.Services
             return success;
         }
 
+        public bool SelectLmvStream(AxleType side)
+        {
+            byte[] data = new byte[1];
+            data[0] = (byte)(side == AxleType.Right ? 1 : 0); // Side selection: 0=Left, 1=Right
+
+            bool success = SendMessage(CAN_MSG_ID_SELECT_LMV_STREAM, data);
+            return success;
+        }
+
         /// <summary>
         /// Switch system mode (Weight vs Brake)
         /// </summary>
@@ -599,18 +612,12 @@ namespace ATS_WPF.Services
 
     }  // Class closing brace
 
-    // v0.1 Event Args Classes - Ultra-Minimal
     public class RawDataEventArgs : EventArgs
     {
-        // Re-introduced for Multi-Vehicle architecture (specifically LMV)
-        // to distinguish Left (0x200) vs Right (0x201) raw streams on a single bus
         public string SideTag { get; set; } = string.Empty; 
         public uint CanId { get; set; }
-        // Raw ADC sum: int to support both modes
-        // - Internal ADC: unsigned 0-16380 (stored as int, treated as unsigned, 4x4095)
-        // - ADS1115: signed -131072 to +131068 (4 channels)
         public int RawADCSum { get; set; }
-        public DateTime TimestampFull { get; set; } // PC3 reception timestamp
+        public DateTime TimestampFull { get; set; } // PC reception timestamp
     }
 
     public class SystemStatusEventArgs : EventArgs

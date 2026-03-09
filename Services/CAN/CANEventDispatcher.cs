@@ -14,6 +14,7 @@ namespace ATS_WPF.Services.CAN
         public event EventHandler<FirmwareVersionEventArgs>? FirmwareVersionReceived;
         public event EventHandler<PerformanceMetricsEventArgs>? PerformanceMetricsReceived;
         public event EventHandler<string>? DataTimeout;
+        public event EventHandler<AxleType>? LmvStreamChanged;
 
         private AdcMode _currentADCMode = AdcMode.InternalWeight; // Track current ADC mode
 
@@ -39,11 +40,7 @@ namespace ATS_WPF.Services.CAN
             switch (canId)
             {
                 case CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA: // 0x200
-                    HandleRawData(canId, canData, "Left"); // Or Total
-                    break;
-                    
-                case CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA_RIGHT: // 0x201
-                    HandleRawData(canId, canData, "Right");
+                    HandleRawData(canId, canData);
                     break;
 
                 case CANMessageProcessor.CAN_MSG_ID_SYSTEM_STATUS: // 0x300
@@ -57,10 +54,23 @@ namespace ATS_WPF.Services.CAN
                 case CANMessageProcessor.CAN_MSG_ID_VERSION_RESPONSE: // 0x301
                     HandleVersionResponse(canData);
                     break;
+
+                case CANMessageProcessor.CAN_MSG_ID_LMV_STREAM_CONFIRM: // 0x303
+                    HandleLmvStreamConfirm(canData);
+                    break;
             }
         }
 
-        private void HandleRawData(uint canId, byte[] canData, string sideTag)
+        private void HandleLmvStreamConfirm(byte[] canData)
+        {
+            if (canData != null && canData.Length >= 1)
+            {
+                AxleType side = canData[0] == 1 ? AxleType.Right : AxleType.Left;
+                LmvStreamChanged?.Invoke(this, side);
+            }
+        }
+
+        private void HandleRawData(uint canId, byte[] canData)
         {
             if (_currentADCMode == AdcMode.InternalWeight) // Internal ADC
             {
@@ -71,8 +81,7 @@ namespace ATS_WPF.Services.CAN
                     {
                         RawADCSum = rawADC,
                         CanId = canId,
-                        TimestampFull = DateTime.Now,
-                        SideTag = sideTag
+                        TimestampFull = DateTime.Now
                     });
                 }
             }
@@ -85,8 +94,7 @@ namespace ATS_WPF.Services.CAN
                     {
                         RawADCSum = rawADC,
                         CanId = canId,
-                        TimestampFull = DateTime.Now,
-                        SideTag = sideTag
+                        TimestampFull = DateTime.Now
                     });
                 }
             }
