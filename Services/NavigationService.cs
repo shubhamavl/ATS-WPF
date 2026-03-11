@@ -12,7 +12,7 @@ namespace ATS_WPF.Services
     {
         public void ShowBootloaderManager()
         {
-            var canService = ServiceRegistry.GetService<ICANService>();
+            var canService = ServiceRegistry.GetService<ICANService>() as CANService;
             var firmwareService = ServiceRegistry.GetService<IFirmwareUpdateService>();
             var diagService = ServiceRegistry.GetService<IBootloaderDiagnosticsService>();
             var dialogService = ServiceRegistry.GetService<IDialogService>();

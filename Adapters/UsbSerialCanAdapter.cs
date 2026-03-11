@@ -99,8 +99,6 @@ namespace ATS_WPF.Adapters
                 _serialPort.Close();
             }
 
-            _serialPort?.Dispose();
-            _serialPort = null;
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
 

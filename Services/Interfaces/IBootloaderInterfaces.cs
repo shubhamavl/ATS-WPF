@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ATS_WPF.Adapters;
 using ATS_WPF.Core;
-using ATS_WPF.Services;
 using ATS_WPF.ViewModels.Bootloader;
 
 namespace ATS_WPF.Services.Interfaces
@@ -83,11 +82,29 @@ namespace ATS_WPF.Services.Interfaces
     /// </summary>
     public interface IBootloaderDiagnosticsService
     {
+        /// <summary>
+        /// Event fired when a new message is captured.
+        /// </summary>
         event EventHandler<BootloaderMessage>? MessageCaptured;
+
+        /// <summary>
+        /// Event fired when a new operation is logged.
+        /// </summary>
         event EventHandler<BootloaderOperation>? OperationLogged;
+
+        /// <summary>
+        /// Event fired when a new error is recorded.
+        /// </summary>
         event EventHandler<BootloaderError>? ErrorRecorded;
 
+        /// <summary>
+        /// Collection of recorded errors.
+        /// </summary>
         IReadOnlyList<BootloaderError> Errors { get; }
+
+        /// <summary>
+        /// Collection of logged operations.
+        /// </summary>
         IReadOnlyList<BootloaderOperation> OperationLog { get; }
 
         /// <summary>
@@ -98,22 +115,41 @@ namespace ATS_WPF.Services.Interfaces
         /// <param name="isSent">True if this was an outgoing message.</param>
         void CaptureMessage(uint canId, byte[] data, bool isSent);
 
-        void LogOperation(string operation, string direction, uint canId, string status, string details);
+        /// <summary>
+        /// Gets all captured messages.
+        /// </summary>
+        List<BootloaderMessage> GetMessages();
 
         /// <summary>
         /// Generates a human-readable text report of all captured messages.
         /// </summary>
         /// <returns>A formatted log string.</returns>
         string ExportMessages();
-        string ExportMessagesToText();
-        List<BootloaderMessage> GetMessages();
 
         /// <summary>
         /// Clears all captured diagnostic messages.
         /// </summary>
         void ClearMessages();
+
+        /// <summary>
+        /// Clears all recorded errors.
+        /// </summary>
         void ClearErrors();
+
+        /// <summary>
+        /// Clears the operation log.
+        /// </summary>
         void ClearOperationLog();
+
+        /// <summary>
+        /// Logs a high-level bootloader operation.
+        /// </summary>
+        void LogOperation(string operation, string direction, uint canId, string status, string details);
+
+        /// <summary>
+        /// Exports all captured messages to text format.
+        /// </summary>
+        string ExportMessagesToText();
     }
 
     /// <summary>

@@ -178,10 +178,6 @@ namespace ATS_WPF.ViewModels
 
         public void RefreshMode()
         {
-            // Mode change tears down all CANNodes — reset connection state
-            IsConnected = false;
-            IsStreaming = false;
-
             OnPropertyChanged(nameof(IsHmvMode));
             OnPropertyChanged(nameof(IsSinglePortMode));
             LoadSettings();
