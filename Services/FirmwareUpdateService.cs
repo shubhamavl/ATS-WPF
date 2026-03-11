@@ -30,7 +30,7 @@ namespace ATS_WPF.Services
         private readonly ICANService _canService;
         private readonly CANBootloaderService _bootloaderService;
         private readonly ProductionLogger _logger = ProductionLogger.Instance;
-        private BootloaderDiagnosticsService? _diagnosticsService;
+        private IBootloaderDiagnosticsService? _diagnosticsService;
 
         private readonly FirmwareProtocolHandler _protocolHandler;
         private readonly FirmwareFlashState _flashState;
@@ -66,7 +66,7 @@ namespace ATS_WPF.Services
         /// <summary>
         /// Set diagnostics service for message capture
         /// </summary>
-        public void SetDiagnosticsService(BootloaderDiagnosticsService? diagnosticsService)
+        public void SetDiagnosticsService(IBootloaderDiagnosticsService? diagnosticsService)
         {
             _diagnosticsService = diagnosticsService;
         }

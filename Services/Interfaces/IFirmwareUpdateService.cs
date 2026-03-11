@@ -25,7 +25,7 @@ namespace ATS_WPF.Services.Interfaces
         /// <summary>
         /// Set diagnostics service for message capture
         /// </summary>
-        void SetDiagnosticsService(BootloaderDiagnosticsService? diagnosticsService);
+        void SetDiagnosticsService(IBootloaderDiagnosticsService? diagnosticsService);
     }
 
     /// <summary>

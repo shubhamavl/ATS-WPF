@@ -106,15 +106,19 @@ namespace ATS_WPF.Core
             {
                 string port = node.NodeId == "Right" ? _settingsService.Settings.RightComPort : 
                               (node.NodeId == "Left" ? _settingsService.Settings.LeftComPort : _settingsService.Settings.ComPort);
-                              
+                               
                 var config = new UsbSerialCanAdapterConfig
                 {
                     PortName = port,
-                    BitrateKbps = (ushort)_settingsService.Settings.CanBaudRate, // Correctly use settings
+                    BitrateKbps = (ushort)_settingsService.Settings.CanBaudRate,
                     SerialBaudRate = 2000000
                 };
                 
-                node.CanService.Connect(config, out _);
+                if (!node.CanService.Connect(config, out string errorMessage))
+                {
+                    ProductionLogger.Instance.LogError($"Failed to connect node {node.NodeId} on port {port}: {errorMessage}", "SystemManager");
+                    throw new Exception($"Failed to connect {node.NodeId} node: {errorMessage}");
+                }
             }
             
             foreach (var axle in _axles)

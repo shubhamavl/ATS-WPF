@@ -92,8 +92,17 @@ namespace ATS_WPF
             services.AddSingleton<SystemManager>();
 
             // Legacy bridge (points to primary node/axle)
-            services.AddSingleton<ICANService>(provider => provider.GetRequiredService<SystemManager>().PhysicalNodes[0].CanService);
-            services.AddSingleton<IWeightProcessorService>(provider => provider.GetRequiredService<SystemManager>().LogicalAxles[0].WeightProcessor);
+            // Using AddTransient here so that any requester always gets the "current" primary service
+            // Note: If a singleton service captures this, it will still be stale. 
+            // Most ViewModels are transient, but StatusMonitorService was already fixed to use SystemManager directly.
+            services.AddTransient<ICANService>(provider => {
+                var sm = provider.GetRequiredService<SystemManager>();
+                return sm.PhysicalNodes.Count > 0 ? sm.PhysicalNodes[0].CanService : null!;
+            });
+            services.AddTransient<IWeightProcessorService>(provider => {
+                var sm = provider.GetRequiredService<SystemManager>();
+                return sm.LogicalAxles.Count > 0 ? sm.LogicalAxles[0].WeightProcessor : null!;
+            });
             
             // Weight & Tare are now managed dynamically per-Axle by SystemManager.
 
@@ -104,7 +113,7 @@ namespace ATS_WPF
             // Status Monitor
             services.AddSingleton<IStatusMonitorService>(provider => {
                 var sm = new StatusMonitorService(
-                    provider.GetRequiredService<ICANService>(),
+                    provider.GetRequiredService<SystemManager>(),
                     provider.GetRequiredService<IDialogService>()
                 );
                 sm.StartMonitoring();

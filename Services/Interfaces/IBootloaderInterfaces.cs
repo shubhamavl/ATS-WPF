@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ATS_WPF.Adapters;
 using ATS_WPF.Core;
+using ATS_WPF.Services;
 using ATS_WPF.ViewModels.Bootloader;
 
 namespace ATS_WPF.Services.Interfaces
@@ -82,6 +83,13 @@ namespace ATS_WPF.Services.Interfaces
     /// </summary>
     public interface IBootloaderDiagnosticsService
     {
+        event EventHandler<BootloaderMessage>? MessageCaptured;
+        event EventHandler<BootloaderOperation>? OperationLogged;
+        event EventHandler<BootloaderError>? ErrorRecorded;
+
+        IReadOnlyList<BootloaderError> Errors { get; }
+        IReadOnlyList<BootloaderOperation> OperationLog { get; }
+
         /// <summary>
         /// Captures a bootloader message for diagnostics.
         /// </summary>
@@ -90,16 +98,22 @@ namespace ATS_WPF.Services.Interfaces
         /// <param name="isSent">True if this was an outgoing message.</param>
         void CaptureMessage(uint canId, byte[] data, bool isSent);
 
+        void LogOperation(string operation, string direction, uint canId, string status, string details);
+
         /// <summary>
         /// Generates a human-readable text report of all captured messages.
         /// </summary>
         /// <returns>A formatted log string.</returns>
         string ExportMessages();
+        string ExportMessagesToText();
+        List<BootloaderMessage> GetMessages();
 
         /// <summary>
         /// Clears all captured diagnostic messages.
         /// </summary>
         void ClearMessages();
+        void ClearErrors();
+        void ClearOperationLog();
     }
 
     /// <summary>

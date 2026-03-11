@@ -22,10 +22,10 @@ namespace ATS_WPF.ViewModels
     /// </summary>
     public class BootloaderViewModel : BaseViewModel
     {
-        private readonly CANService _canService;
+        private readonly ICANService _canService;
         private readonly CANBootloaderService _bootloaderService;
-        private readonly FirmwareUpdateService _firmwareUpdateService;
-        private readonly BootloaderDiagnosticsService _diagnosticsService;
+        private readonly IFirmwareUpdateService _firmwareUpdateService;
+        private readonly IBootloaderDiagnosticsService _diagnosticsService;
         private readonly IDialogService _dialogService;
         private readonly ProductionLogger _logger = ProductionLogger.Instance;
 
@@ -213,15 +213,15 @@ namespace ATS_WPF.ViewModels
 
         public BootloaderViewModel(
             ICANService canService,
-            FirmwareUpdateService firmwareUpdateService,
-            BootloaderDiagnosticsService diagnosticsService,
+            IFirmwareUpdateService firmwareUpdateService,
+            IBootloaderDiagnosticsService diagnosticsService,
             IDialogService dialogService)
         {
-            _canService = (CANService)canService;
+            _canService = canService;
             _bootloaderService = new CANBootloaderService(canService);
             _firmwareUpdateService = firmwareUpdateService;
             _dialogService = dialogService;
-
+ 
             _diagnosticsService = diagnosticsService;
 
             // Initialize state machine and diagnostics

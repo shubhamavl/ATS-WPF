@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using ATS_WPF.Services;
+using ATS_WPF.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 
 namespace ATS_WPF.ViewModels.Bootloader
@@ -34,13 +35,13 @@ namespace ATS_WPF.ViewModels.Bootloader
     /// </summary>
     public class BootloaderDiagnosticsViewModel : BaseViewModel
     {
-        private readonly BootloaderDiagnosticsService _diagnosticsService;
+        private readonly IBootloaderDiagnosticsService _diagnosticsService;
 
         public ObservableCollection<BootloaderMessageViewModel> Messages { get; } = new();
         public ObservableCollection<BootloaderErrorViewModel> Errors { get; } = new();
         public ObservableCollection<BootloaderOperation> OperationLog { get; } = new();
 
-        public BootloaderDiagnosticsViewModel(BootloaderDiagnosticsService diagnosticsService)
+        public BootloaderDiagnosticsViewModel(IBootloaderDiagnosticsService diagnosticsService)
         {
             _diagnosticsService = diagnosticsService;
 
