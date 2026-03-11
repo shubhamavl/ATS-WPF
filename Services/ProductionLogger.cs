@@ -86,8 +86,7 @@ namespace ATS_WPF.Services
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             string logsDir = PathHelper.GetLogsDirectory(); // Portable: relative to executable
 
-            string vehicleModeStr = SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
-            _logFilePath = Path.Combine(logsDir, $"ats_wpf_{vehicleModeStr}_log_{timestamp}.txt");
+            _logFilePath = Path.Combine(logsDir, $"ats_wpf_log_{timestamp}.txt");
         }
 
         /// <summary>

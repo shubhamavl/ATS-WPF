@@ -93,6 +93,7 @@ namespace ATS_WPF
 
             // Legacy bridge (points to primary node/axle)
             services.AddSingleton<ICANService>(provider => provider.GetRequiredService<SystemManager>().PhysicalNodes[0].CanService);
+            services.AddSingleton<IWeightProcessorService>(provider => provider.GetRequiredService<SystemManager>().LogicalAxles[0].WeightProcessor);
             
             // Weight & Tare are now managed dynamically per-Axle by SystemManager.
 
