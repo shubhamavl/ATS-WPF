@@ -13,17 +13,18 @@ namespace ATS_WPF.Services
         public void ShowBootloaderManager()
         {
             var canService = ServiceRegistry.GetService<ICANService>();
+            var systemManager = ServiceRegistry.GetService<ISystemManager>();
             var firmwareService = ServiceRegistry.GetService<IFirmwareUpdateService>();
             var diagService = ServiceRegistry.GetService<IBootloaderDiagnosticsService>();
             var dialogService = ServiceRegistry.GetService<IDialogService>();
 
-            if (canService == null || firmwareService == null || diagService == null || dialogService == null)
+            if (canService == null || systemManager == null || firmwareService == null || diagService == null || dialogService == null)
             {
                 dialogService?.ShowError("Required services for Bootloader not found.", "Service Error");
                 return;
             }
 
-            var vm = new BootloaderViewModel(canService, firmwareService, diagService, dialogService);
+            var vm = new BootloaderViewModel(canService, systemManager, firmwareService, diagService, dialogService);
             var window = new BootloaderManagerWindow(vm);
             window.Owner = Application.Current.MainWindow;
             window.ShowDialog();

@@ -28,6 +28,10 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" Visibility="{Binding AxleNameVisibility}" Margin="0,0,0,4">
+                        <TextBlock Text="Target Axle: " FontSize="12" Foreground="#D32F2F" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding TargetNodeName}" FontSize="12" Foreground="#D32F2F" FontWeight="Bold"/>
+                    </StackPanel>
                     <TextBlock x:Name="BootloaderStatusText" Text="{Binding BootloaderStatusText}" FontWeight="Bold" FontSize="12"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1">
