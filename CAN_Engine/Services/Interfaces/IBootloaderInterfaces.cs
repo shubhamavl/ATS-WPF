@@ -1,14 +1,12 @@
+#if CAN_ENGINE_BOOTLOADER
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ATS.CAN.Engine.Adapters;
-using ATS.CAN.Engine.Adapters;
-using ATS_WPF.Core;
 using ATS.CAN.Engine.Core;
-using ATS_WPF.ViewModels.Bootloader;
-
 using ATS.CAN.Engine.Models;
-namespace ATS_WPF.Services.Interfaces
+
+namespace ATS.CAN.Engine.Services.Interfaces
 {
     /// <summary>
     /// Interface for bootloader CAN communication operations.
@@ -227,4 +225,5 @@ namespace ATS_WPF.Services.Interfaces
         void LogError(Exception ex, string message, string source = "");
     }
 }
+#endif
 

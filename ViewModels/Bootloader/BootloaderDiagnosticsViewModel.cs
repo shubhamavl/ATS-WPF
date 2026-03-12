@@ -4,7 +4,9 @@ using System.Linq;
 using System.Windows;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services;
 using ATS.CAN.Engine.Services.Interfaces;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.ViewModels.Base;
 
 namespace ATS_WPF.ViewModels.Bootloader
@@ -215,4 +217,3 @@ namespace ATS_WPF.ViewModels.Bootloader
         }
     }
 }
-

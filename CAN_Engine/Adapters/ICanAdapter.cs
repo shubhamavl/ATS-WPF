@@ -88,6 +88,7 @@ namespace ATS.CAN.Engine.Adapters
         public int SerialBaudRate { get; set; } = 2000000;
     }
 
+#if CAN_ENGINE_PCAN
     /// <summary>
     /// Configuration for PCAN adapter
     /// </summary>
@@ -103,6 +104,7 @@ namespace ATS.CAN.Engine.Adapters
         /// </summary>
         public ushort PcanBitrate { get; set; } = 0x001C; // PCAN_BAUD_500K
     }
+#endif
 }
 
 

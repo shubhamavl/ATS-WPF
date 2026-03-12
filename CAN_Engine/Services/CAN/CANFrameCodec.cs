@@ -1,8 +1,7 @@
 using System;
-using ATS_WPF.Models;
 using ATS.CAN.Engine.Models;
 
-namespace ATS_WPF.Services.CAN
+namespace ATS.CAN.Engine.Services.CAN
 {
     /// <summary>
     /// Handles CAN frame encoding and decoding

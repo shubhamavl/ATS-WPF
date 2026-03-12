@@ -1,12 +1,11 @@
+#if CAN_ENGINE_BOOTLOADER
 using System;
-using ATS_WPF.Core;
+using System;
 using ATS.CAN.Engine.Core;
-using ATS_WPF.Models;
 using ATS.CAN.Engine.Models;
-using ATS_WPF.Services.Interfaces;
 using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Services
+namespace ATS.CAN.Engine.Services
 {
     public class CANBootloaderService : ICANBootloaderService, IDisposable
     {
@@ -144,4 +143,5 @@ namespace ATS_WPF.Services
         }
     }
 }
+#endif
 

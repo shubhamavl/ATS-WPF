@@ -9,6 +9,8 @@ using ATS.CAN.Engine.Services.CAN;
 using ATS.CAN.Engine.Services;
 using ATS_WPF.Core;
 using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Models;
+using ATS_WPF.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ATS_WPF

@@ -1,6 +1,3 @@
-using ATS_WPF.Services;
-using ATS_WPF.Models;
-using ATS_WPF.Services.Interfaces;
 using System;
 using ATS.CAN.Engine.Services;
 using ATS.CAN.Engine.Services.Interfaces;

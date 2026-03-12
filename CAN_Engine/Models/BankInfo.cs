@@ -1,3 +1,4 @@
+#if CAN_ENGINE_BOOTLOADER
 using System;
 
 namespace ATS.CAN.Engine.Models
@@ -53,5 +54,6 @@ namespace ATS.CAN.Engine.Models
         public string VersionString => Version?.ToString() ?? "Unknown";
     }
 }
+#endif
 
 

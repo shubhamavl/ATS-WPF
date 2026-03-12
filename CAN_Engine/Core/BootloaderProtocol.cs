@@ -1,3 +1,4 @@
+#if CAN_ENGINE_BOOTLOADER
 using ATS.CAN.Engine.Models;
 namespace ATS.CAN.Engine.Core
 {
@@ -135,6 +136,7 @@ namespace ATS.CAN.Engine.Core
 
     }
 }
+#endif
 
 
 

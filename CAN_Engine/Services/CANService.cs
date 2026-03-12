@@ -1,6 +1,3 @@
-using ATS_WPF.Services;
-using ATS_WPF.Models;
-using ATS_WPF.Services.Interfaces;
 using System;
 using System.IO;
 using System.IO.Ports;
@@ -17,7 +14,7 @@ using ATS.CAN.Engine.Services.Interfaces;
 using ATS.CAN.Engine.Core.Exceptions;
 
 using System.Runtime.CompilerServices;
-[assembly: InternalsVisibleTo("ATS_WPF.Tests")]
+// Removed InternalsVisibleTo for portability
 
 namespace ATS.CAN.Engine.Services
 {
@@ -62,6 +59,7 @@ namespace ATS.CAN.Engine.Services
         private const uint CAN_MSG_ID_VERSION_RESPONSE = CANMessageProcessor.CAN_MSG_ID_VERSION_RESPONSE;
         private const uint CAN_MSG_ID_LMV_STREAM_CONFIRM = CANMessageProcessor.CAN_MSG_ID_LMV_STREAM_CONFIRM;
 
+#if CAN_ENGINE_BOOTLOADER
         // Bootloader protocol IDs (matching STM32 implementation)
         private const uint CAN_MSG_ID_BOOT_ENTER = BootloaderProtocol.CanIdBootEnter;
         private const uint CAN_MSG_ID_BOOT_QUERY_INFO = BootloaderProtocol.CanIdBootQueryInfo;
@@ -76,6 +74,7 @@ namespace ATS.CAN.Engine.Services
         private const uint CAN_MSG_ID_BOOT_END_RESPONSE = BootloaderProtocol.CanIdBootEndResponse;
         private const uint CAN_MSG_ID_BOOT_ERROR = BootloaderProtocol.CanIdBootError;
         private const uint CAN_MSG_ID_BOOT_QUERY_RESPONSE = BootloaderProtocol.CanIdBootQueryResponse;
+#endif
 
         // Rate Selection Codes
         private const byte CAN_RATE_100HZ = 0x01;  // 100Hz (10ms interval)
@@ -106,9 +105,11 @@ namespace ATS.CAN.Engine.Services
         private ICanAdapter? _adapter;
         private readonly CANEventDispatcher _eventDispatcher;
         private readonly ICanLogger _logger;
+        private readonly ICanSettings _settings;
 
-        public CANService(ICanLogger? logger = null)
+        public CANService(ICanSettings settings, ICanLogger? logger = null)
         {
+            _settings = settings;
             _logger = logger ?? DefaultCanLogger.Instance;
             _connected = false;
             _eventDispatcher = new CANEventDispatcher();
@@ -126,9 +127,8 @@ namespace ATS.CAN.Engine.Services
             _eventDispatcher.DataTimeout += (s, e) => DataTimeout?.Invoke(this, e);
 
             // Initialize timeout from settings
-            var settings = SettingsManager.Instance;
-            UpdateTimeoutFromSettings(settings.Settings.DataTimeoutSeconds);
-            settings.SettingsChanged += (s, e) => UpdateTimeoutFromSettings(settings.Settings.DataTimeoutSeconds);
+            UpdateTimeoutFromSettings(_settings.DataTimeoutSeconds);
+            _settings.SettingsChanged += (s, e) => UpdateTimeoutFromSettings(_settings.DataTimeoutSeconds);
         }
 
         private void UpdateTimeoutFromSettings(int seconds)
@@ -167,10 +167,12 @@ namespace ATS.CAN.Engine.Services
             {
                 adapter = new UsbSerialCanAdapter(_logger);
             }
+#if CAN_ENGINE_PCAN
             else if (config is PcanCanAdapterConfig)
             {
                 adapter = new PcanCanAdapter(_logger);
             }
+#endif
             else
             {
                 errorMessage = "Unknown adapter configuration type";
@@ -471,13 +473,13 @@ namespace ATS.CAN.Engine.Services
                 if (log || id == CAN_MSG_ID_STATUS_REQUEST)
                 {
                     string dataStr = (data == null || data.Length == 0) ? "[No Data]" : BitConverter.ToString(data);
-                    ProductionLogger.Instance.LogInfo($"CAN: Sent frame ID=0x{id:X3} to {(_adapter?.AdapterType ?? "Unknown")}", "CANService");
+                    _logger.LogInfo($"CAN: Sent frame ID=0x{id:X3} to {(_adapter?.AdapterType ?? "Unknown")}", "CANService");
                 }
                 return result;
             }
             catch (Exception ex)
             {
-                ProductionLogger.Instance.LogError($"Send message error: {ex.Message}", "CANService");
+                _logger.LogError($"Send message error: {ex.Message}", "CANService");
                 throw new CANSendException(id, ex.Message);
             }
         }
@@ -607,12 +609,12 @@ namespace ATS.CAN.Engine.Services
         {
             if (timeout.TotalSeconds < 1 || timeout.TotalSeconds > 300)
             {
-                ProductionLogger.Instance.LogWarning($"Invalid timeout value: {timeout.TotalSeconds}s (must be 1-300 seconds)", "CANService");
+                _logger.LogWarning($"Invalid timeout value: {timeout.TotalSeconds}s (must be 1-300 seconds)", "CANService");
                 return;
             }
 
             _timeout = timeout;
-            ProductionLogger.Instance.LogInfo($"CAN data timeout set to {timeout.TotalSeconds} seconds", "CANService");
+            _logger.LogInfo($"CAN data timeout set to {timeout.TotalSeconds} seconds", "CANService");
         }
 
         public void Dispose()

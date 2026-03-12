@@ -1,6 +1,3 @@
-using ATS_WPF.Services;
-using ATS_WPF.Models;
-using ATS_WPF.Services.Interfaces;
 using System;
 using ATS.CAN.Engine.Models;
 using ATS.CAN.Engine.Adapters;
@@ -60,7 +57,7 @@ namespace ATS.CAN.Engine.Services.CAN
                 _currentService.DataTimeout += ForwardDataTimeout;
                 _currentService.LmvStreamChanged += ForwardLmvStreamChanged;
                 
-                ProductionLogger.Instance.LogInfo($"ManagedCanProxy: Switched to node index {_systemManager.ActiveNodeIndex}", "Proxy");
+                // Note: ManagedCanProxy is a bridge, logging logic removed or moved to DI logger if needed
             }
         }
 
@@ -119,8 +116,6 @@ namespace ATS.CAN.Engine.Services.CAN
         public bool RequestSystemStatus(bool log = true) 
         {
             if (_currentService == null) return false;
-            // Force logging for debugging since StatusMonitor calls this with log=false
-            ProductionLogger.Instance.LogInfo($"Proxy: Requesting status for node {_systemManager.ActiveNodeIndex}", "Proxy");
             return _currentService.RequestSystemStatus(log);
         }
 

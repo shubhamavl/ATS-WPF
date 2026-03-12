@@ -28,6 +28,9 @@
     <AnalysisMode>Default</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    
+    <!-- CAN Engine Features -->
+    <DefineConstants>$(DefineConstants);CAN_ENGINE_PCAN;CAN_ENGINE_BOOTLOADER</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

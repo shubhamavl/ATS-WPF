@@ -1,3 +1,4 @@
+#if CAN_ENGINE_PCAN
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -355,4 +356,5 @@ namespace ATS.CAN.Engine.Adapters
         }
     }
 }
+#endif
 

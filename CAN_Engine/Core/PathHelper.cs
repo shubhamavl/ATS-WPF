@@ -17,7 +17,7 @@ namespace ATS.CAN.Engine.Core
         {
             get
             {
-                return @"C:\ProgramData\ATS_WPF";
+                return @"C:\ProgramData\ATS.Shared.CAN";
             }
         }
 

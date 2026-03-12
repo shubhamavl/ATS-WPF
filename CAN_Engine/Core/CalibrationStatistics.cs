@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ATS_WPF.Core
+namespace ATS.CAN.Engine.Core
 {
     /// <summary>
     /// Result of calibration capture with statistics

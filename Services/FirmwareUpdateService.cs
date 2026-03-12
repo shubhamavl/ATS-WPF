@@ -10,6 +10,7 @@ using ATS.CAN.Engine.Core;
 using ATS.CAN.Engine.Core.Exceptions;
 using ATS.CAN.Engine.Core.Exceptions;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services;
 using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.Services.FirmwareUpdate;
 
@@ -64,7 +65,7 @@ namespace ATS_WPF.Services
         {
             _canService = canService;
             _bootloaderService = new CANBootloaderService(canService);
-            _protocolHandler = new FirmwareProtocolHandler(canService, _bootloaderService);
+            _protocolHandler = new FirmwareProtocolHandler(canService, _bootloaderService, ProductionLogger.Instance);
             _flashState = new FirmwareFlashState();
         }
 

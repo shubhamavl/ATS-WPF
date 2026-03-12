@@ -1,6 +1,3 @@
-using ATS_WPF.Services;
-using ATS_WPF.Models;
-using ATS_WPF.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using ATS.CAN.Engine.Models;
@@ -92,7 +89,7 @@ namespace ATS.CAN.Engine.Core
 
         private CANNode CreateNode(string nodeId, string portName)
         {
-            var canService = new CANService(_logger); // Pass injected logger
+            var canService = new CANService(_settings, _logger); // Pass injected settings and logger
             return new CANNode(nodeId, canService);
         }
 

@@ -1,6 +1,3 @@
-using ATS_WPF.Services;
-using ATS_WPF.Models;
-using ATS_WPF.Services.Interfaces;
 using System;
 using System.IO.Ports;
 using System.Threading;

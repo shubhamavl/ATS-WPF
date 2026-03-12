@@ -1,23 +1,26 @@
+#if CAN_ENGINE_BOOTLOADER
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using ATS_WPF.Core;
 using ATS.CAN.Engine.Core;
-using ATS_WPF.Models;
 using ATS.CAN.Engine.Models;
-using ATS_WPF.Services.Interfaces;
 using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Services
+namespace ATS.CAN.Engine.Services
 {
     /// <summary>
     /// Service for bootloader diagnostics, message capture, and troubleshooting
     /// </summary>
     public class BootloaderDiagnosticsService : IBootloaderDiagnosticsService
     {
-        private readonly ProductionLogger _logger = ProductionLogger.Instance;
+        private readonly ICanLogger _logger;
         private readonly object _lock = new object();
+
+        public BootloaderDiagnosticsService(ICanLogger logger)
+        {
+            _logger = logger;
+        }
 
         // Message capture (thread-safe)
         private readonly List<BootloaderMessage> _messages = new List<BootloaderMessage>();
@@ -457,5 +460,6 @@ namespace ATS_WPF.Services
         public string Details { get; set; } = "";
     }
 }
+#endif
 
 

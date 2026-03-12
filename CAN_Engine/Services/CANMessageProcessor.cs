@@ -41,15 +41,21 @@ namespace ATS.CAN.Engine.Services
                 case CAN_MSG_ID_LMV_STREAM_CONFIRM:
                     return true;
                 default:
+#if CAN_ENGINE_BOOTLOADER
                     // Check bootloader IDs separately or include here
                     return IsBootloaderMessage(canId);
+#else
+                    return false;
+#endif
             }
         }
 
+#if CAN_ENGINE_BOOTLOADER
         public static bool IsBootloaderMessage(uint canId)
         {
             return canId >= 0x510 && canId <= 0x520;
         }
+#endif
 
         public static (uint id, byte[] data) DecodeFrame(byte[] frame)
         {

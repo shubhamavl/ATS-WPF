@@ -1,3 +1,4 @@
+#if CAN_ENGINE_BOOTLOADER
 using System;
 using ATS.CAN.Engine.Core;
 
@@ -39,5 +40,6 @@ namespace ATS.CAN.Engine.Models
         public BankInfo Bank { get; set; } = new BankInfo { BankNumber = 0 };
     }
 }
+#endif
 
 
