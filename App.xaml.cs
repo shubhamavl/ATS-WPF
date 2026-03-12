@@ -1,9 +1,16 @@
+using System;
 using System.Windows;
 using System.IO;
 using ATS_WPF.Views;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
+using ATS.CAN.Engine.Services.CAN;
+using ATS.CAN.Engine.Services;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Models;
+using ATS_WPF.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ATS_WPF
@@ -53,8 +60,9 @@ namespace ATS_WPF
             };
 
             // Initialize System Manager early to populate nodes for legacy ICANService bridge
-            var systemManager = ServiceProvider.GetRequiredService<SystemManager>();
+            // SystemManager is now instantiated in the App constructor
             var settings = ServiceProvider.GetRequiredService<ISettingsService>();
+            var systemManager = ServiceProvider.GetRequiredService<SystemManager>(); // Resolved from DI
             systemManager.Initialize(settings.Settings.VehicleMode);
 
             // Resolve and show MainWindow
@@ -82,17 +90,24 @@ namespace ATS_WPF
             // Infrastructure Services
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IDialogService, DialogService>(); // Fixed potential missing dependency
             services.AddSingleton<IUpdateService, UpdateService>();
             services.AddSingleton<IDataLoggerService, DataLogger>();
             services.AddSingleton<IProductionLoggerService>(ProductionLogger.Instance);
             services.AddSingleton<StatusHistoryManager>();
             services.AddSingleton<ISettingsService>(SettingsManager.Instance);
+            services.AddSingleton<ICanSettings>(SettingsManager.Instance);
+            services.AddSingleton<ICanLogger, ATS_WPF.Adapters.ProductionCanLogger>();
+            services.AddSingleton<ICanDataLogger, ATS_WPF.Adapters.DataLoggerAdapter>();
 
             // Unified System Manager (Depends on Settings and DataLogger)
             services.AddSingleton<SystemManager>();
+            services.AddSingleton<ISystemManager>(provider => provider.GetRequiredService<SystemManager>());
 
-            // Legacy bridge (points to primary node/axle)
-            services.AddSingleton<ICANService>(provider => provider.GetRequiredService<SystemManager>().PhysicalNodes[0].CanService);
+            // Switchable CAN proxy (dynamically points to ActiveNode in SystemManager)
+            services.AddSingleton<ICANService, ManagedCanProxy>();
+
+            services.AddSingleton<IWeightProcessorService>(provider => provider.GetRequiredService<SystemManager>().LogicalAxles[0].WeightProcessor);
             
             // Weight & Tare are now managed dynamically per-Axle by SystemManager.
 
@@ -122,4 +137,3 @@ namespace ATS_WPF
         }
     }
 }
-

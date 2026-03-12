@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using ATS.CAN.Engine.Services.Interfaces;
 
 namespace ATS_WPF.Services.Interfaces
 {
@@ -25,7 +26,7 @@ namespace ATS_WPF.Services.Interfaces
         /// <summary>
         /// Set diagnostics service for message capture
         /// </summary>
-        void SetDiagnosticsService(BootloaderDiagnosticsService? diagnosticsService);
+        void SetDiagnosticsService(IBootloaderDiagnosticsService? diagnosticsService);
     }
 
     /// <summary>

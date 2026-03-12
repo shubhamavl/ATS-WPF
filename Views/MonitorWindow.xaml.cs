@@ -4,9 +4,16 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Collections.Generic;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services;
+using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Services;
+using ATS_WPF.ViewModels;
 
 namespace ATS_WPF.Views
 {
@@ -15,9 +22,9 @@ namespace ATS_WPF.Views
         private readonly ObservableCollection<CANMessageEntry> _messages;
         private DispatcherTimer? _updateTimer;
         private bool _isMonitoring = false;
-        private CANService? _canService;
+        private ICANService? _canService;
 
-        public MonitorWindow(CANService? canService = null)
+        public MonitorWindow(ICANService? canService = null)
         {
             InitializeComponent();
 
@@ -100,7 +107,7 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Stop monitor error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -114,7 +121,7 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Clear monitor error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -133,7 +140,7 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Update timer error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -203,7 +210,7 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Add message error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -257,7 +264,7 @@ namespace ATS_WPF.Views
             catch (IOException ex)
             {
                 MessageBox.Show($"Export IO error: {ex.Message}", "Export Failed",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -267,7 +274,7 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Export error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -340,7 +347,7 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Close error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -362,9 +369,8 @@ namespace ATS_WPF.Views
             catch (Exception ex)
             {
                 MessageBox.Show($"Window close error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                               MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
 }
-

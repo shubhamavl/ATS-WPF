@@ -3,7 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
 namespace ATS_WPF.Services
 {
@@ -50,6 +52,7 @@ namespace ATS_WPF.Services
                 if (_wasConnected)
                 {
                     // Transitioned to disconnected
+                    ProductionLogger.Instance.LogWarning("Monitor: CAN Service disconnected. Stopping status requests.", "StatusMonitor");
                     UpdateAvailability(false);
                     _wasConnected = false;
                 }

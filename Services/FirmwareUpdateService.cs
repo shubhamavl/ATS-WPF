@@ -3,12 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ATS_WPF.Adapters;
+using ATS.CAN.Engine.Adapters;
 using ATS_WPF.Core;
-using ATS_WPF.Core.Exceptions;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Core.Exceptions;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.Services.FirmwareUpdate;
 
+using ATS.CAN.Engine.Models;
 namespace ATS_WPF.Services
 {
     public sealed class FirmwareUpdateService : IFirmwareUpdateService
@@ -30,7 +34,7 @@ namespace ATS_WPF.Services
         private readonly ICANService _canService;
         private readonly CANBootloaderService _bootloaderService;
         private readonly ProductionLogger _logger = ProductionLogger.Instance;
-        private BootloaderDiagnosticsService? _diagnosticsService;
+        private IBootloaderDiagnosticsService? _diagnosticsService;
 
         private readonly FirmwareProtocolHandler _protocolHandler;
         private readonly FirmwareFlashState _flashState;
@@ -59,14 +63,14 @@ namespace ATS_WPF.Services
         {
             _canService = canService;
             _bootloaderService = new CANBootloaderService(canService);
-            _protocolHandler = new FirmwareProtocolHandler(canService, _bootloaderService);
+            _protocolHandler = new FirmwareProtocolHandler(canService, _bootloaderService, ProductionLogger.Instance);
             _flashState = new FirmwareFlashState();
         }
 
         /// <summary>
         /// Set diagnostics service for message capture
         /// </summary>
-        public void SetDiagnosticsService(BootloaderDiagnosticsService? diagnosticsService)
+        public void SetDiagnosticsService(IBootloaderDiagnosticsService? diagnosticsService)
         {
             _diagnosticsService = diagnosticsService;
         }

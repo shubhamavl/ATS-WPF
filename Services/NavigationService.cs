@@ -1,10 +1,13 @@
 using System;
 using System.Windows;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.Views;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.ViewModels;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.Services
 {
@@ -12,18 +15,19 @@ namespace ATS_WPF.Services
     {
         public void ShowBootloaderManager()
         {
-            var canService = ServiceRegistry.GetService<ICANService>() as CANService;
-            var firmwareService = ServiceRegistry.GetService<FirmwareUpdateService>();
-            var diagService = ServiceRegistry.GetService<BootloaderDiagnosticsService>();
+            var canService = ServiceRegistry.GetService<ICANService>();
+            var systemManager = ServiceRegistry.GetService<ISystemManager>();
+            var firmwareService = ServiceRegistry.GetService<IFirmwareUpdateService>();
+            var diagService = ServiceRegistry.GetService<IBootloaderDiagnosticsService>();
             var dialogService = ServiceRegistry.GetService<IDialogService>();
 
-            if (canService == null || firmwareService == null || diagService == null || dialogService == null)
+            if (canService == null || systemManager == null || firmwareService == null || diagService == null || dialogService == null)
             {
                 dialogService?.ShowError("Required services for Bootloader not found.", "Service Error");
                 return;
             }
 
-            var vm = new BootloaderViewModel(canService, firmwareService, diagService, dialogService);
+            var vm = new BootloaderViewModel(canService, systemManager, firmwareService, diagService, dialogService);
             var window = new BootloaderManagerWindow(vm);
             window.Owner = Application.Current.MainWindow;
             window.ShowDialog();
@@ -47,7 +51,7 @@ namespace ATS_WPF.Services
 
         public void ShowMonitorWindow()
         {
-            var canService = ServiceRegistry.GetService<ICANService>() as CANService;
+            var canService = ServiceRegistry.GetService<ICANService>();
             var win = new MonitorWindow(canService);
             win.Owner = Application.Current.MainWindow;
             win.Show();

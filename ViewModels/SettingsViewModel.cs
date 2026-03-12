@@ -5,9 +5,12 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.ViewModels.Settings;
 
@@ -193,12 +196,11 @@ namespace ATS_WPF.ViewModels
                 "Confirm Reset",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
-
             if (result == MessageBoxResult.Yes)
             {
                 try
                 {
-                    LinearCalibration.DeleteCalibration(AxleType.Total, mode, SystemMode.Weight);
+                    LinearCalibration.DeleteCalibration(_settingsManager.Settings.VehicleMode, AxleType.Total, mode, SystemMode.Weight);
                     Calibration.RefreshCalibrationData();
                     MessageBox.Show("Calibration deleted.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }

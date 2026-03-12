@@ -2,7 +2,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 
 namespace ATS_WPF.Services.FirmwareUpdate
 {
@@ -13,7 +17,7 @@ namespace ATS_WPF.Services.FirmwareUpdate
     {
         private readonly ICANService _canService;
         private readonly CANBootloaderService _bootloaderService;
-        private readonly ProductionLogger _logger = ProductionLogger.Instance;
+        private readonly IProductionLoggerService _logger;
 
         // Timeout constants
         private const int PING_TIMEOUT_MS = 2000;
@@ -27,10 +31,11 @@ namespace ATS_WPF.Services.FirmwareUpdate
         private TaskCompletionSource<BootloaderStatus>? _endWaitSource;
         private System.Collections.Concurrent.ConcurrentQueue<BootloaderStatus>? _beginResponseQueue;
 
-        public FirmwareProtocolHandler(ICANService canService, CANBootloaderService bootloaderService)
+        public FirmwareProtocolHandler(ICANService canService, CANBootloaderService bootloaderService, IProductionLoggerService logger)
         {
             _canService = canService;
             _bootloaderService = bootloaderService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -241,4 +246,3 @@ namespace ATS_WPF.Services.FirmwareUpdate
         }
     }
 }
-

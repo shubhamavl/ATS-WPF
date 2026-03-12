@@ -1,15 +1,10 @@
 using System;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.Models
 {
-    public enum VehicleMode
-    {
-        TwoWheeler,
-        LMV,
-        HMV
-    }
-
     /// <summary>
     /// Application settings data structure
     /// </summary>
@@ -79,5 +74,3 @@ namespace ATS_WPF.Models
         public double BrakeKgToNewtonMultiplier { get; set; } = 9.80665; // Default g
     }
 }
-
-

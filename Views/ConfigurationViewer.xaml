@@ -49,13 +49,29 @@
 
         <!-- Header -->
         <Border Grid.Row="0" Background="#FF1B5E96" CornerRadius="8" Padding="20,15" Margin="0,0,0,15">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="🛠️" FontSize="24" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                <StackPanel>
-                    <TextBlock Text="System Configuration Viewer" Foreground="White" FontSize="18" FontWeight="Bold"/>
-                    <TextBlock Text="Technical calibration data and file locations" Foreground="#FFE3F2FD" FontSize="12"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="🛠️" FontSize="24" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                    <StackPanel>
+                        <TextBlock Text="System Configuration Viewer" Foreground="White" FontSize="18" FontWeight="Bold"/>
+                        <TextBlock Text="Technical calibration data and file locations" Foreground="#FFE3F2FD" FontSize="12"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
+
+                <!-- Axle Selector (Visible if multiple exist) -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Orientation="Horizontal">
+                    <TextBlock Text="Target Axle:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0" FontWeight="SemiBold"/>
+                    <ComboBox Width="120" Padding="5" 
+                              ItemsSource="{Binding AvailableAxles}" 
+                              SelectedItem="{Binding SelectedAxle}"
+                              Visibility="{Binding IsAxleSelectorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Content -->

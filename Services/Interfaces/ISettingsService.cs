@@ -1,6 +1,8 @@
 using System;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
 namespace ATS_WPF.Services.Interfaces
 {

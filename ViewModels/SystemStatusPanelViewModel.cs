@@ -3,15 +3,19 @@ using System.Windows.Input;
 using System.Windows.Media;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
 namespace ATS_WPF.ViewModels
 {
     public class SystemStatusPanelViewModel : BaseViewModel
     {
         private readonly SystemManager _systemManager;
+        private readonly ICANService _canService;
         private readonly IDialogService? _dialogService;
 
         // Properties
@@ -87,9 +91,10 @@ namespace ATS_WPF.ViewModels
         private readonly IStatusMonitorService? _statusMonitor;
         private readonly StatusHistoryManager? _historyManager;
 
-        public SystemStatusPanelViewModel(SystemManager systemManager, INavigationService? navigationService, IStatusMonitorService? statusMonitor, IDialogService? dialogService = null, StatusHistoryManager? historyManager = null)
+        public SystemStatusPanelViewModel(SystemManager systemManager, ICANService canService, INavigationService? navigationService, IStatusMonitorService? statusMonitor, IDialogService? dialogService = null, StatusHistoryManager? historyManager = null)
         {
             _systemManager = systemManager;
+            _canService = canService;
             _navigationService = navigationService;
             _statusMonitor = statusMonitor;
             _dialogService = dialogService;
@@ -98,7 +103,11 @@ namespace ATS_WPF.ViewModels
             RequestFirmwareCommand = new RelayCommand(OnRequestFirmware);
             ShowHistoryCommand = new RelayCommand(OnShowHistory);
 
-            ReattachNodes();
+            // Subscribe to the proxy service
+            _canService.SystemStatusReceived += OnSystemStatusReceived;
+            _canService.PerformanceMetricsReceived += OnPerformanceMetricsReceived;
+            _canService.FirmwareVersionReceived += OnFirmwareVersionReceived;
+            _canService.DataTimeout += OnDataTimeout;
 
             if (_statusMonitor != null)
             {
@@ -216,29 +225,11 @@ namespace ATS_WPF.ViewModels
 
         private void OnRequestFirmware(object? parameter)
         {
-            foreach(var node in _systemManager.PhysicalNodes)
-            {
-                node.CanService.RequestFirmwareVersion();
-            }
+            _canService.RequestFirmwareVersion();
         }
 
-        public void ReattachNodes()
-        {
-            // Note: In a production app, we would explicitly unsubscribe from old nodes here
-            // but since they are being disposed/replaced by SystemManager, we just subscribe to new ones.
-            foreach (var node in _systemManager.PhysicalNodes)
-            {
-                node.CanService.SystemStatusReceived -= OnSystemStatusReceived;
-                node.CanService.PerformanceMetricsReceived -= OnPerformanceMetricsReceived;
-                node.CanService.FirmwareVersionReceived -= OnFirmwareVersionReceived;
-                node.CanService.DataTimeout -= OnDataTimeout;
-
-                node.CanService.SystemStatusReceived += OnSystemStatusReceived;
-                node.CanService.PerformanceMetricsReceived += OnPerformanceMetricsReceived;
-                node.CanService.FirmwareVersionReceived += OnFirmwareVersionReceived;
-                node.CanService.DataTimeout += OnDataTimeout;
-            }
-        }
+        [Obsolete("Use proxy service subscriptions instead")]
+        public void ReattachNodes() { }
 
         public void Refresh()
         {

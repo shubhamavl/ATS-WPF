@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services;
+using ATS.CAN.Engine.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.ViewModels.Bootloader;
-using ATS_WPF.Core.Exceptions;
+using ATS.CAN.Engine.Core.Exceptions;
 using System.ComponentModel;
 
 namespace ATS_WPF.ViewModels
@@ -22,10 +26,11 @@ namespace ATS_WPF.ViewModels
     /// </summary>
     public class BootloaderViewModel : BaseViewModel
     {
-        private readonly CANService _canService;
+        private readonly ICANService _canService;
+        private readonly ISystemManager _systemManager;
         private readonly CANBootloaderService _bootloaderService;
-        private readonly FirmwareUpdateService _firmwareUpdateService;
-        private readonly BootloaderDiagnosticsService _diagnosticsService;
+        private readonly IFirmwareUpdateService _firmwareUpdateService;
+        private readonly IBootloaderDiagnosticsService _diagnosticsService;
         private readonly IDialogService _dialogService;
         private readonly ProductionLogger _logger = ProductionLogger.Instance;
 
@@ -147,6 +152,15 @@ namespace ATS_WPF.ViewModels
             set => SetProperty(ref _statusText, value);
         }
 
+        private string _targetNodeName = "Unknown";
+        public string TargetNodeName
+        {
+            get => _targetNodeName;
+            set => SetProperty(ref _targetNodeName, value);
+        }
+
+        public Visibility AxleNameVisibility => _systemManager.CurrentMode == VehicleMode.HMV ? Visibility.Visible : Visibility.Collapsed;
+
         #endregion
 
         #region Update State
@@ -213,11 +227,13 @@ namespace ATS_WPF.ViewModels
 
         public BootloaderViewModel(
             ICANService canService,
-            FirmwareUpdateService firmwareUpdateService,
-            BootloaderDiagnosticsService diagnosticsService,
+            ISystemManager systemManager,
+            IFirmwareUpdateService firmwareUpdateService,
+            IBootloaderDiagnosticsService diagnosticsService,
             IDialogService dialogService)
         {
-            _canService = (CANService)canService;
+            _canService = canService;
+            _systemManager = systemManager;
             _bootloaderService = new CANBootloaderService(canService);
             _firmwareUpdateService = firmwareUpdateService;
             _dialogService = dialogService;
@@ -250,10 +266,45 @@ namespace ATS_WPF.ViewModels
             // Subscribe to CAN service events
             _canService.MessageReceived += OnCANMessageReceived;
 
+            // Subscribe to node changes
+            _systemManager.ActiveNodeChanged += OnActiveNodeChanged;
+            UpdateTargetNodeName();
+
             // Initialize event handlers (handles bootloader service subscriptions)
             _eventHandlers = new BootloaderEventHandlers(this, _bootloaderService, _diagnostics, _stateMachine);
 
             UpdateUI();
+        }
+
+        private void OnActiveNodeChanged(object? sender, EventArgs e)
+        {
+            if (IsUpdating)
+            {
+                _logger.LogWarning("Active node changed during firmware update!", "BootloaderViewModel");
+                // Note: The update will likely fail due to CAN proxy switching nodes, 
+                // but we don't force a cancel here to avoid race conditions with the service.
+            }
+
+            // Reset current axle info when target node changes
+            BootloaderInfo = new BootloaderInfo();
+            UpdateTargetNodeName();
+            UpdateUI();
+            
+            _diagnostics.LogOperation("Target Switched", "SYSTEM", 0, "Info", $"Switched to AXLE: {TargetNodeName}");
+        }
+
+        private void UpdateTargetNodeName()
+        {
+            if (_systemManager.CurrentMode == VehicleMode.HMV)
+            {
+                var node = _systemManager.PhysicalNodes.ElementAtOrDefault(_systemManager.ActiveNodeIndex);
+                TargetNodeName = node?.NodeId ?? $"Node {_systemManager.ActiveNodeIndex}";
+            }
+            else
+            {
+                TargetNodeName = "Standard";
+            }
+            OnPropertyChanged(nameof(AxleNameVisibility));
         }
 
         private void OnStepChanged(object? sender, BootloaderProcessStep newStep)
@@ -747,6 +798,7 @@ namespace ATS_WPF.ViewModels
         {
             // Unsubscribe from events
             _canService.MessageReceived -= OnCANMessageReceived;
+            _systemManager.ActiveNodeChanged -= OnActiveNodeChanged;
             _eventHandlers.Dispose();
             _bootloaderService.Dispose();
             _diagnostics.Dispose();

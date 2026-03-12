@@ -5,9 +5,12 @@ using System.Windows.Input;
 using System.Windows;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.ViewModels
 {
@@ -103,7 +106,8 @@ namespace ATS_WPF.ViewModels
             IUpdateService updateService,
             IDialogService dialogService,
             IStatusMonitorService statusMonitor,
-            StatusHistoryManager historyManager)
+            StatusHistoryManager historyManager,
+            ICANService canService)
         {
             _systemManager = systemManager;
             _dataLogger = dataLogger;
@@ -114,7 +118,7 @@ namespace ATS_WPF.ViewModels
 
             // Child ViewModels
             Connection = new ConnectionViewModel(_systemManager, settings);
-            SystemStatus = new SystemStatusPanelViewModel(_systemManager, navigationService, statusMonitor, dialogService);
+            SystemStatus = new SystemStatusPanelViewModel(_systemManager, canService, navigationService, statusMonitor, dialogService, historyManager);
             Logging = new LoggingPanelViewModel(dataLogger, _systemManager);
             StatusBar = new AppStatusBarViewModel(_systemManager, updateService, dialogService);
             Settings = new SettingsViewModel(settings);
@@ -155,6 +159,13 @@ namespace ATS_WPF.ViewModels
             {
                 ActiveAxle = target;
                 SelectedAxleTab = type;
+
+                // Sync with hardware node for HMV mode
+                if (_systemManager.CurrentMode == VehicleMode.HMV)
+                {
+                    int nodeIndex = type == AxleType.Right ? 1 : 0;
+                    _systemManager.SetActiveNode(nodeIndex);
+                }
             }
         }
 
@@ -186,12 +197,41 @@ namespace ATS_WPF.ViewModels
 
         // ─── Mode Change ───────────────────────────────────────────────────────
 
-        private void OnVehicleModeChanged(VehicleMode mode)
+        private async void OnVehicleModeChanged(VehicleMode mode)
         {
-            _systemManager.SetVehicleMode(mode);
-            RebuildAxleViewModels();
-            Connection.RefreshMode();
-            SystemStatus.ReattachNodes();
+            // Update and save settings immediately
+            _settings.Settings.VehicleMode = mode;
+            _settings.SaveSettings();
+
+            // Prompt user for restart
+            bool restart = MessageBox.Show(
+                $"Vehicle mode changed to {mode}. The application must restart to apply hardware and service changes.\n\nRestart now?",
+                "Vehicle Mode Change",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+            if (restart)
+            {
+                // Safety: Disconnect all nodes explicitly to release OS handles
+                _systemManager.DisconnectAll();
+                
+                // Small delay to allow Windows to catch up with port closure
+                await System.Threading.Tasks.Task.Delay(500);
+
+                // Launch new instance
+                string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
+                if (!string.IsNullOrEmpty(exePath))
+                {
+                    System.Diagnostics.Process.Start(exePath);
+                    Application.Current.Shutdown();
+                }
+            }
+            else
+            {
+                // Revert selection in UI if user cancels
+                _selectedVehicleMode = _systemManager.CurrentMode;
+                OnPropertyChanged(nameof(SelectedVehicleMode));
+            }
         }
 
         // ─── Timer / Refresh ───────────────────────────────────────────────────
