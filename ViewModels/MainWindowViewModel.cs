@@ -188,10 +188,33 @@ namespace ATS_WPF.ViewModels
 
         private void OnVehicleModeChanged(VehicleMode mode)
         {
-            _systemManager.SetVehicleMode(mode);
-            RebuildAxleViewModels();
-            Connection.RefreshMode();
-            SystemStatus.ReattachNodes();
+            // Update and save settings immediately
+            _settings.Settings.VehicleMode = mode;
+            _settings.SaveSettings();
+
+            // Prompt user for restart
+            bool restart = MessageBox.Show(
+                $"Vehicle mode changed to {mode}. The application must restart to apply hardware and service changes.\n\nRestart now?",
+                "Vehicle Mode Change",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+            if (restart)
+            {
+                // Launch new instance
+                string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName ?? "";
+                if (!string.IsNullOrEmpty(exePath))
+                {
+                    System.Diagnostics.Process.Start(exePath);
+                    Application.Current.Shutdown();
+                }
+            }
+            else
+            {
+                // Revert selection in UI if user cancels (optional, but good UX)
+                _selectedVehicleMode = _systemManager.CurrentMode;
+                OnPropertyChanged(nameof(SelectedVehicleMode));
+            }
         }
 
         // ─── Timer / Refresh ───────────────────────────────────────────────────
