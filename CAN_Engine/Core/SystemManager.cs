@@ -43,6 +43,19 @@ namespace ATS.CAN.Engine.Core
             }
         }
 
+        public void Initialize(VehicleMode mode, string portMain)
+        {
+            _settings.ComPort = portMain;
+            Initialize(mode);
+        }
+
+        public void Initialize(VehicleMode mode, string portLeft, string portRight)
+        {
+            _settings.LeftComPort = portLeft;
+            _settings.RightComPort = portRight;
+            Initialize(mode);
+        }
+
         public void Initialize(VehicleMode mode)
         {
             CurrentMode = mode;

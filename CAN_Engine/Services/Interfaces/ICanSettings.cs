@@ -11,13 +11,13 @@ namespace ATS.CAN.Engine.Services.Interfaces
     public interface ICanSettings
     {
         /// <summary>COM port for single-node modes (TwoWheeler, LMV, 3W)</summary>
-        string ComPort { get; }
-
+        string ComPort { get; set; }
+ 
         /// <summary>COM port for HMV Left node</summary>
-        string LeftComPort { get; }
-
+        string LeftComPort { get; set; }
+ 
         /// <summary>COM port for HMV Right node</summary>
-        string RightComPort { get; }
+        string RightComPort { get; set; }
 
         /// <summary>CAN bus baud rate setting</summary>
         ushort CanBitrateKbps { get; }

@@ -47,9 +47,21 @@ namespace ATS_WPF.Services
         public AppSettings Settings => _settings;
 
         // ICanSettings Implementation
-        string ICanSettings.ComPort => _settings.ComPort;
-        string ICanSettings.LeftComPort => _settings.LeftComPort;
-        string ICanSettings.RightComPort => _settings.RightComPort;
+        string ICanSettings.ComPort 
+        { 
+            get => _settings.ComPort; 
+            set => _settings.ComPort = value; 
+        }
+        string ICanSettings.LeftComPort 
+        { 
+            get => _settings.LeftComPort; 
+            set => _settings.LeftComPort = value; 
+        }
+        string ICanSettings.RightComPort 
+        { 
+            get => _settings.RightComPort; 
+            set => _settings.RightComPort = value; 
+        }
         ushort ICanSettings.CanBitrateKbps => GetBitrateValue(_settings.CanBaudRate);
         byte ICanSettings.TransmissionRateCode => (byte)_settings.TransmissionRate;
         int ICanSettings.DataTimeoutSeconds => _settings.DataTimeoutSeconds;
