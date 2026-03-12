@@ -19,8 +19,6 @@ namespace ATS.CAN.Engine.Adapters
         public string AdapterType => "USB-CAN-A Serial";
 
         private readonly ICanLogger _logger;
-        private bool _isBrakeMode = false;
-        private TareManager? _tareManager;
         private string _portName = string.Empty;
         private SerialPort? _serialPort;
         private readonly ConcurrentQueue<byte> _frameBuffer = new();
