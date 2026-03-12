@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using ATS_WPF.Models;
 using ATS_WPF.Services;
+using ATS_WPF.Services.Interfaces;
 using ATS_WPF.Core;
 
 namespace ATS_WPF.Views
@@ -15,9 +16,9 @@ namespace ATS_WPF.Views
         private readonly ObservableCollection<CANMessageEntry> _messages;
         private DispatcherTimer? _updateTimer;
         private bool _isMonitoring = false;
-        private CANService? _canService;
+        private ICANService? _canService;
 
-        public MonitorWindow(CANService? canService = null)
+        public MonitorWindow(ICANService? canService = null)
         {
             InitializeComponent();
 

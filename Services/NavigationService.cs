@@ -12,7 +12,7 @@ namespace ATS_WPF.Services
     {
         public void ShowBootloaderManager()
         {
-            var canService = ServiceRegistry.GetService<ICANService>() as CANService;
+            var canService = ServiceRegistry.GetService<ICANService>();
             var firmwareService = ServiceRegistry.GetService<IFirmwareUpdateService>();
             var diagService = ServiceRegistry.GetService<IBootloaderDiagnosticsService>();
             var dialogService = ServiceRegistry.GetService<IDialogService>();
@@ -47,7 +47,7 @@ namespace ATS_WPF.Services
 
         public void ShowMonitorWindow()
         {
-            var canService = ServiceRegistry.GetService<ICANService>() as CANService;
+            var canService = ServiceRegistry.GetService<ICANService>();
             var win = new MonitorWindow(canService);
             win.Owner = Application.Current.MainWindow;
             win.Show();

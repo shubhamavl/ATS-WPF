@@ -457,10 +457,10 @@ namespace ATS_WPF.Services
                 // TxMessageCount++; 
                 // MessageReceived?.Invoke(txMessage);
 
-                if (log)
+                if (log || id == CAN_MSG_ID_STATUS_REQUEST)
                 {
                     string dataStr = (data == null || data.Length == 0) ? "[No Data]" : BitConverter.ToString(data);
-                    ProductionLogger.Instance.LogInfo($"CAN: Sent CAN frame ID=0x{id:X3}, Data={dataStr}", "CANService");
+                    ProductionLogger.Instance.LogInfo($"CAN: Sent frame ID=0x{id:X3} to {(_adapter?.AdapterType ?? "Unknown")}", "CANService");
                 }
                 return result;
             }

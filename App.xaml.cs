@@ -3,6 +3,7 @@ using System.IO;
 using ATS_WPF.Views;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS_WPF.Services.CAN;
 using ATS_WPF.Core;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -90,9 +91,11 @@ namespace ATS_WPF
 
             // Unified System Manager (Depends on Settings and DataLogger)
             services.AddSingleton<SystemManager>();
+            services.AddSingleton<ISystemManager>(provider => provider.GetRequiredService<SystemManager>());
 
-            // Legacy bridge (points to primary node/axle)
-            services.AddSingleton<ICANService>(provider => provider.GetRequiredService<SystemManager>().PhysicalNodes[0].CanService);
+            // Switchable CAN proxy (dynamically points to ActiveNode in SystemManager)
+            services.AddSingleton<ICANService, ManagedCanProxy>();
+
             services.AddSingleton<IWeightProcessorService>(provider => provider.GetRequiredService<SystemManager>().LogicalAxles[0].WeightProcessor);
             
             // Weight & Tare are now managed dynamically per-Axle by SystemManager.

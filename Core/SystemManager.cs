@@ -14,6 +14,12 @@ namespace ATS_WPF.Core
         private readonly ISettingsService _settingsService;
         private readonly IDataLoggerService _dataLogger;
 
+        private int _activeNodeIndex = 0;
+        public int ActiveNodeIndex => _activeNodeIndex;
+        public ICANService ActiveNodeService => (_nodes.Count > _activeNodeIndex) ? _nodes[_activeNodeIndex].CanService : (_nodes.Count > 0 ? _nodes[0].CanService : null!);
+        public event EventHandler? ActiveNodeChanged;
+        public event EventHandler? NodesInitialized;
+
         public VehicleMode CurrentMode { get; private set; }
         public IReadOnlyList<CANNode> PhysicalNodes => _nodes.AsReadOnly();
         public IReadOnlyList<AxleSystem> LogicalAxles => _axles.AsReadOnly();
@@ -22,6 +28,16 @@ namespace ATS_WPF.Core
         {
             _settingsService = settingsService;
             _dataLogger = dataLogger;
+        }
+
+        public void SetActiveNode(int index)
+        {
+            if (index >= 0 && index < _nodes.Count && _activeNodeIndex != index)
+            {
+                _activeNodeIndex = index;
+                ActiveNodeChanged?.Invoke(this, EventArgs.Empty);
+                ProductionLogger.Instance.LogInfo($"Active CAN node switched to index: {index}", "SystemManager");
+            }
         }
 
         public void Initialize(VehicleMode mode)
@@ -64,6 +80,8 @@ namespace ATS_WPF.Core
                 _axles.Add(leftAxle);
                 _axles.Add(rightAxle);
             }
+
+            NodesInitialized?.Invoke(this, EventArgs.Empty);
         }
 
         private CANNode CreateNode(string nodeId, string portName)
@@ -98,23 +116,35 @@ namespace ATS_WPF.Core
 
             _nodes.Clear();
             _axles.Clear();
+            _activeNodeIndex = 0;
         }
 
         public void ConnectAll()
         {
+            ProductionLogger.Instance.LogInfo($"Connecting all nodes for mode: {CurrentMode}", "SystemManager");
+            
             foreach (var node in _nodes)
             {
                 string port = node.NodeId == "Right" ? _settingsService.Settings.RightComPort : 
                               (node.NodeId == "Left" ? _settingsService.Settings.LeftComPort : _settingsService.Settings.ComPort);
                               
+                ProductionLogger.Instance.LogInfo($"Connecting node '{node.NodeId}' on port '{port}'...", "SystemManager");
+
                 var config = new UsbSerialCanAdapterConfig
                 {
                     PortName = port,
-                    BitrateKbps = (ushort)_settingsService.Settings.CanBaudRate, // Correctly use settings
+                    BitrateKbps = GetBitrateValue(_settingsService.Settings.CanBaudRate), 
                     SerialBaudRate = 2000000
                 };
                 
-                node.CanService.Connect(config, out _);
+                if (node.CanService.Connect(config, out string error))
+                {
+                    ProductionLogger.Instance.LogInfo($"Node '{node.NodeId}' connected successfully.", "SystemManager");
+                }
+                else
+                {
+                    ProductionLogger.Instance.LogError($"Node '{node.NodeId}' failed to connect on {port}: {error}", "SystemManager");
+                }
             }
             
             foreach (var axle in _axles)
@@ -187,6 +217,18 @@ namespace ATS_WPF.Core
         public void Dispose()
         {
             DisconnectAll();
+        }
+
+        private ushort GetBitrateValue(CanBaudRate baudRate)
+        {
+            return baudRate switch
+            {
+                CanBaudRate.Bps125k => 125,
+                CanBaudRate.Bps250k => 250,
+                CanBaudRate.Bps500k => 500,
+                CanBaudRate.Bps1M => 1000,
+                _ => 250
+            };
         }
     }
 }

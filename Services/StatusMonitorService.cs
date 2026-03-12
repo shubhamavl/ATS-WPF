@@ -50,6 +50,7 @@ namespace ATS_WPF.Services
                 if (_wasConnected)
                 {
                     // Transitioned to disconnected
+                    ProductionLogger.Instance.LogWarning("Monitor: CAN Service disconnected. Stopping status requests.", "StatusMonitor");
                     UpdateAvailability(false);
                     _wasConnected = false;
                 }

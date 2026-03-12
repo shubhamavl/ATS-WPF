@@ -22,7 +22,7 @@ namespace ATS_WPF.ViewModels
     /// </summary>
     public class BootloaderViewModel : BaseViewModel
     {
-        private readonly CANService _canService;
+        private readonly ICANService _canService;
         private readonly CANBootloaderService _bootloaderService;
         private readonly IFirmwareUpdateService _firmwareUpdateService;
         private readonly IBootloaderDiagnosticsService _diagnosticsService;
@@ -217,7 +217,7 @@ namespace ATS_WPF.ViewModels
             IBootloaderDiagnosticsService diagnosticsService,
             IDialogService dialogService)
         {
-            _canService = (CANService)canService;
+            _canService = canService;
             _bootloaderService = new CANBootloaderService(canService);
             _firmwareUpdateService = firmwareUpdateService;
             _dialogService = dialogService;
