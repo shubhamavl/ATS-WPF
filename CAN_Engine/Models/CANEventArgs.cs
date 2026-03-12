@@ -40,30 +40,39 @@ namespace ATS.CAN.Engine.Models
         public string VersionStringFull => $"{Major}.{Minor}.{Patch}.{Build}";
     }
 
+#if CAN_ENGINE_BOOTLOADER
     public class BootPingResponseEventArgs : EventArgs
     {
         public DateTime Timestamp { get; set; }
     }
+#endif
 
+#if CAN_ENGINE_BOOTLOADER
     public class BootBeginResponseEventArgs : EventArgs
     {
         public BootloaderStatus Status { get; set; }
         public DateTime Timestamp { get; set; }
     }
+#endif
 
+#if CAN_ENGINE_BOOTLOADER
     public class BootProgressEventArgs : EventArgs
     {
         public byte Percent { get; set; }
         public uint BytesReceived { get; set; }
         public DateTime Timestamp { get; set; }
     }
+#endif
 
+#if CAN_ENGINE_BOOTLOADER
     public class BootEndResponseEventArgs : EventArgs
     {
         public BootloaderStatus Status { get; set; }
         public DateTime Timestamp { get; set; }
     }
+#endif
 
+#if CAN_ENGINE_BOOTLOADER
     public class BootErrorEventArgs : EventArgs
     {
         public uint CanId { get; set; }
@@ -71,7 +80,9 @@ namespace ATS.CAN.Engine.Models
         public DateTime Timestamp { get; set; }
         public string Message => RawData != null ? ATS.CAN.Engine.Core.BootloaderProtocol.ParseErrorMessage(CanId, RawData) : "Unknown Error";
     }
+#endif
 
+#if CAN_ENGINE_BOOTLOADER
     public class BootQueryResponseEventArgs : EventArgs
     {
         public bool Present { get; set; }
@@ -83,6 +94,7 @@ namespace ATS.CAN.Engine.Models
         public byte BankBValid { get; set; }
         public DateTime Timestamp { get; set; }
     }
+#endif
 
     public class CANErrorEventArgs : EventArgs
     {
