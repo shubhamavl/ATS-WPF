@@ -94,6 +94,9 @@ namespace ATS_WPF
             services.AddSingleton<IProductionLoggerService>(ProductionLogger.Instance);
             services.AddSingleton<StatusHistoryManager>();
             services.AddSingleton<ISettingsService>(SettingsManager.Instance);
+            services.AddSingleton<ICanSettings>(SettingsManager.Instance);
+            services.AddSingleton<ICanLogger, ATS_WPF.Adapters.ProductionCanLogger>();
+            services.AddSingleton<ICanDataLogger, ATS_WPF.Adapters.DataLoggerAdapter>();
 
             // Unified System Manager (Depends on Settings and DataLogger)
             services.AddSingleton<SystemManager>();
