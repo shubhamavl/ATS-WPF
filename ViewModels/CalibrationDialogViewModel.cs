@@ -13,7 +13,6 @@ using ATS_WPF.ViewModels.Base;
 using ATS_WPF.Core;
 using ATS.CAN.Engine.Core;
 using ATS.CAN.Engine.Adapters;
-using ATS.CAN.Engine.Adapters;
 
 namespace ATS_WPF.ViewModels
 {
@@ -402,4 +401,3 @@ namespace ATS_WPF.ViewModels
         }
     }
 }
-

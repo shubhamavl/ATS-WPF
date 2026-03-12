@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using ATS.CAN.Engine.Adapters;
-using ATS.CAN.Engine.Adapters;
 using ATS_WPF.Services.Interfaces;
 using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
@@ -328,4 +327,3 @@ namespace ATS_WPF.ViewModels
         }
     }
 }
-
