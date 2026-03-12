@@ -95,8 +95,7 @@ namespace ATS.CAN.Engine.Services
             _settings = settings;
             _dataLogger = dataLogger;
             _logger = logger ?? DefaultCanLogger.Instance;
-            _vehicleMode = vehicleMode;
-
+            
             canService.RawDataReceived += (s, e) => {
                 if (IsStreamForThisAxle(e))
                 {
