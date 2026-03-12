@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
 namespace ATS_WPF.Services
 {

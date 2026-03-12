@@ -1,7 +1,7 @@
 using System;
-using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
-namespace ATS_WPF.Adapters
+namespace ATS.CAN.Engine.Adapters
 {
     /// <summary>
     /// Interface for CAN adapter implementations

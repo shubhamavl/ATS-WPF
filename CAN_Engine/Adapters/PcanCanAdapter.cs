@@ -3,9 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Peak.Can.Basic;
-using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Adapters
+namespace ATS.CAN.Engine.Adapters
 {
     /// <summary>
     /// PCAN adapter implementation using Peak.PCANBasic.NET NuGet package
@@ -14,6 +15,7 @@ namespace ATS_WPF.Adapters
     {
         public string AdapterType => "PCAN";
 
+        private readonly ICanLogger _logger;
         private PcanChannel _channel = PcanChannel.Usb01;
         private volatile bool _connected;
         private CancellationTokenSource? _cancellationTokenSource;
@@ -92,7 +94,7 @@ namespace ATS_WPF.Adapters
             }
             catch (Exception ex)
             {
-                errorMessage = $"PCAN connection error: {ex.Message}";
+                _logger.LogError($"PCAN connection error: {ex.Message}", "PcanCanAdapter");
                 System.Diagnostics.Debug.WriteLine($"PCAN connection error: {ex.Message}");
                 _connected = false;
                 ConnectionStatusChanged?.Invoke(this, false);
@@ -312,6 +314,11 @@ namespace ATS_WPF.Adapters
             {
                 return $"PCAN Error Code: {status}";
             }
+        }
+
+        public PcanCanAdapter(ICanLogger? logger = null)
+        {
+            _logger = logger ?? DefaultCanLogger.Instance;
         }
 
         private PcanChannel ConvertToPcanChannel(ushort channelValue)

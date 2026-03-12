@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.ViewModels.Bootloader;
-using ATS_WPF.Core.Exceptions;
+using ATS.CAN.Engine.Core.Exceptions;
+using ATS.CAN.Engine.Core.Exceptions;
 using System.ComponentModel;
 
 namespace ATS_WPF.ViewModels

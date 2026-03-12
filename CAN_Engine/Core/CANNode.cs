@@ -1,7 +1,8 @@
+using ATS.CAN.Engine.Models;
 using System;
-using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Core
+namespace ATS.CAN.Engine.Core
 {
     public class CANNode
     {

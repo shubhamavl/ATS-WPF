@@ -3,9 +3,12 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.ViewModels
 {

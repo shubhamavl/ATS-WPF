@@ -1,7 +1,8 @@
+using ATS.CAN.Engine.Models;
 using System;
 using System.IO;
 
-namespace ATS_WPF.Core
+namespace ATS.CAN.Engine.Core
 {
     /// <summary>
     /// Helper class for portable file paths - all paths relative to executable directory
@@ -96,21 +97,21 @@ namespace ATS_WPF.Core
         /// <param name="adcMode">ADC mode enum</param>
         /// <param name="systemMode">System mode enum</param>
         /// <param name="axleType">The type of the axle (e.g. Total, Left, Right)</param>
-        public static string GetCalibrationPath(Models.AxleType axleType, Models.AdcMode adcMode, Models.SystemMode systemMode = Models.SystemMode.Weight)
+        public static string GetCalibrationPath(VehicleMode vehicleMode, Models.AxleType axleType, Models.AdcMode adcMode, Models.SystemMode systemMode = Models.SystemMode.Weight)
         {
-            string vehicleMode = Services.SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
+            string modeStr = vehicleMode.ToString().ToLower();
             string modeSuffix = adcMode == Models.AdcMode.InternalWeight ? "internal" : "ads1115";
             string typeSuffix = systemMode == Models.SystemMode.Brake ? "_brake" : "";
-            return Path.Combine(GetDataDirectory(), $"calibration_{vehicleMode}_{axleType.ToString().ToLower()}_{modeSuffix}{typeSuffix}.json");
+            return Path.Combine(GetDataDirectory(), $"calibration_{modeStr}_{axleType.ToString().ToLower()}_{modeSuffix}{typeSuffix}.json");
         }
 
         /// <summary>
         /// Gets the path to the tare configuration file (portable, in Data directory)
         /// </summary>
-        public static string GetTareConfigPath(Models.AxleType axleType)
+        public static string GetTareConfigPath(VehicleMode vehicleMode, Models.AxleType axleType)
         {
-            string vehicleMode = Services.SettingsManager.Instance.Settings.VehicleMode.ToString().ToLower();
-            return Path.Combine(GetDataDirectory(), $"tare_{vehicleMode}_{axleType.ToString().ToLower()}_config.json");
+            string modeStr = vehicleMode.ToString().ToLower();
+            return Path.Combine(GetDataDirectory(), $"tare_{modeStr}_{axleType.ToString().ToLower()}_config.json");
         }
 
         /// <summary>

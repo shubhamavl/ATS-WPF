@@ -1,18 +1,21 @@
+using ATS_WPF.Services;
+using ATS_WPF.Models;
+using ATS_WPF.Services.Interfaces;
 using System;
 using System.Collections.Generic;
-using ATS_WPF.Models;
-using ATS_WPF.Adapters;
-using ATS_WPF.Services;
-using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Adapters;
+using ATS.CAN.Engine.Services;
+using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Core
+namespace ATS.CAN.Engine.Core
 {
     public class SystemManager : ISystemManager, IDisposable
     {
         private readonly List<CANNode> _nodes = new();
         private readonly List<AxleSystem> _axles = new();
-        private readonly ISettingsService _settingsService;
-        private readonly IDataLoggerService _dataLogger;
+        private readonly ICanSettings _settings;
+        private readonly ICanDataLogger _dataLogger;
 
         private int _activeNodeIndex = 0;
         public int ActiveNodeIndex => _activeNodeIndex;
@@ -24,10 +27,13 @@ namespace ATS_WPF.Core
         public IReadOnlyList<CANNode> PhysicalNodes => _nodes.AsReadOnly();
         public IReadOnlyList<AxleSystem> LogicalAxles => _axles.AsReadOnly();
 
-        public SystemManager(ISettingsService settingsService, IDataLoggerService dataLogger)
+        private readonly ICanLogger _logger; // Added ICanLogger field
+
+        public SystemManager(ICanSettings settings, ICanDataLogger dataLogger, ICanLogger? logger = null)
         {
-            _settingsService = settingsService;
+            _settings = settings;
             _dataLogger = dataLogger;
+            _logger = logger ?? DefaultCanLogger.Instance;
         }
 
         public void SetActiveNode(int index)
@@ -36,7 +42,7 @@ namespace ATS_WPF.Core
             {
                 _activeNodeIndex = index;
                 ActiveNodeChanged?.Invoke(this, EventArgs.Empty);
-                ProductionLogger.Instance.LogInfo($"Active CAN node switched to index: {index}", "SystemManager");
+                _logger.LogInfo($"Active CAN node switched to index: {index}", "SystemManager"); // Replaced ProductionLogger
             }
         }
 
@@ -45,7 +51,7 @@ namespace ATS_WPF.Core
             CurrentMode = mode;
             Cleanup();
 
-            var settings = _settingsService.Settings;
+            var settings = _settings;
 
             if (mode == VehicleMode.TwoWheeler)
             {
@@ -86,8 +92,7 @@ namespace ATS_WPF.Core
 
         private CANNode CreateNode(string nodeId, string portName)
         {
-            var canService = new CANService(); // Create dedicated service per node
-            // Note: Settings may need to supply specific port info per CANService instance later
+            var canService = new CANService(_logger); // Pass injected logger
             return new CANNode(nodeId, canService);
         }
 
@@ -95,9 +100,9 @@ namespace ATS_WPF.Core
         {
             // Create dedicated TareManager and WeightProcessor for this axle
             var tareManager = new TareManager(axleType);
-            tareManager.LoadFromFile(); // Will need update to support separate files
+            tareManager.LoadFromFile(CurrentMode); 
 
-            var weightProcessor = new WeightProcessor(axleType, CurrentMode, node.CanService, tareManager, _settingsService, _dataLogger);
+            var weightProcessor = new WeightProcessor(axleType, CurrentMode, node.CanService, tareManager, _settings, _dataLogger, _logger);
             
             return new AxleSystem(axleType, node, tareManager, weightProcessor);
         }
@@ -121,29 +126,29 @@ namespace ATS_WPF.Core
 
         public void ConnectAll()
         {
-            ProductionLogger.Instance.LogInfo($"Connecting all nodes for mode: {CurrentMode}", "SystemManager");
+            _logger.LogInfo($"Connecting all nodes for mode: {CurrentMode}", "SystemManager");
             
             foreach (var node in _nodes)
             {
-                string port = node.NodeId == "Right" ? _settingsService.Settings.RightComPort : 
-                              (node.NodeId == "Left" ? _settingsService.Settings.LeftComPort : _settingsService.Settings.ComPort);
+                string port = node.NodeId == "Right" ? _settings.RightComPort : 
+                               (node.NodeId == "Left" ? _settings.LeftComPort : _settings.ComPort);
                               
-                ProductionLogger.Instance.LogInfo($"Connecting node '{node.NodeId}' on port '{port}'...", "SystemManager");
+                _logger.LogInfo($"Connecting node '{node.NodeId}' on port '{port}'...", "SystemManager");
 
                 var config = new UsbSerialCanAdapterConfig
                 {
                     PortName = port,
-                    BitrateKbps = GetBitrateValue(_settingsService.Settings.CanBaudRate), 
+                    BitrateKbps = _settings.CanBitrateKbps, 
                     SerialBaudRate = 2000000
                 };
                 
                 if (node.CanService.Connect(config, out string error))
                 {
-                    ProductionLogger.Instance.LogInfo($"Node '{node.NodeId}' connected successfully.", "SystemManager");
+                    _logger.LogInfo($"Node '{node.NodeId}' connected successfully.", "SystemManager");
                 }
                 else
                 {
-                    ProductionLogger.Instance.LogError($"Node '{node.NodeId}' failed to connect on {port}: {error}", "SystemManager");
+                    _logger.LogError($"Node '{node.NodeId}' failed to connect on {port}: {error}", "SystemManager");
                 }
             }
             
@@ -174,14 +179,14 @@ namespace ATS_WPF.Core
                 // Selection of left/right side (0x048) is handled sequentially in UI or WeightProcessor.
                 if (_nodes.Count > 0)
                 {
-                    _nodes[0].CanService.StartStream(_settingsService.Settings.TransmissionRate, CANMessageProcessor.CAN_MSG_ID_START_STREAM);
+                    _nodes[0].CanService.StartStream((TransmissionRate)_settings.TransmissionRateCode, CANMessageProcessor.CAN_MSG_ID_START_STREAM);
                 }
             }
             else
             {
                 foreach (var node in _nodes)
                 {
-                    node.CanService.StartStream(_settingsService.Settings.TransmissionRate);
+                    node.CanService.StartStream((TransmissionRate)_settings.TransmissionRateCode);
                 }
             }
         }
@@ -201,9 +206,8 @@ namespace ATS_WPF.Core
             DisconnectAll();
             Initialize(mode);
             
-            // Persist to settings
-            _settingsService.Settings.VehicleMode = mode;
-            _settingsService.SaveSettings();
+            CurrentMode = mode;
+            _logger.LogInfo($"SystemManager initialized in {mode} mode", "SystemManager");
         }
 
         public void SetBrakeModeAll(bool isBrakeMode)

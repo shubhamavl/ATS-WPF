@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 
 namespace ATS_WPF.Services
 {

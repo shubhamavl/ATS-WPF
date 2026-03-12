@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System; // Added for IDisposable
-using ATS_WPF.Core; // Added
+using ATS_WPF.Core;
+using ATS.CAN.Engine.Core; // Added
 using ATS_WPF.Services; // Added
-using ATS_WPF.Services.Interfaces; // Added
+using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces; // Added
 
 namespace ATS_WPF.ViewModels.Base
 {

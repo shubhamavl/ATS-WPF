@@ -3,8 +3,12 @@ using System.IO;
 using System.Text;
 using System.Globalization;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
+using ATS.CAN.Engine.Services;
 
 namespace ATS_WPF.Services
 {
@@ -17,7 +21,6 @@ namespace ATS_WPF.Services
         private bool _isLogging = false;
         private readonly object _logLock = new object();
 
-        // System status tracking
         // System status tracking
         private SystemStatus _lastSystemStatus = SystemStatus.Ok;
         private byte _lastErrorFlags = 0;
@@ -272,4 +275,3 @@ namespace ATS_WPF.Services
         }
     }
 }
-

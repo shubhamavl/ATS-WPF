@@ -1,4 +1,4 @@
-namespace ATS_WPF.Models
+namespace ATS.CAN.Engine.Models
 {
     /// <summary>
     /// Supported ADC Modes for the ATS System
@@ -76,6 +76,18 @@ namespace ATS_WPF.Models
         Hz500 = 0x02,
         Hz1000 = 0x03,
         Hz1 = 0x05
+    }
+
+    /// <summary>
+    /// Vehicle operating modes supported by the CAN Engine.
+    /// Used by SystemManager to configure the correct number of CAN nodes.
+    /// </summary>
+    public enum VehicleMode
+    {
+        TwoWheeler = 0,
+        LMV = 1,
+        ThreeWheeler = 2,
+        HMV = 3
     }
 }
 

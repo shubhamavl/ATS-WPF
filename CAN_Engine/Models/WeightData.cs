@@ -1,6 +1,6 @@
 using System;
 
-namespace ATS_WPF.Models
+namespace ATS.CAN.Engine.Models
 {
     /// <summary>
     /// Raw weight data from CAN (ATS Two-Wheeler)

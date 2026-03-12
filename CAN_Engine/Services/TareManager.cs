@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using ATS_WPF.Core;
-using ATS_WPF.Models;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Models;
 
-namespace ATS_WPF.Services
+namespace ATS.CAN.Engine.Services
 {
     /// <summary>
     /// Tare manager for calibrator weight offset compensation (ATS Two-Wheeler).
@@ -155,7 +155,7 @@ namespace ATS_WPF.Services
         /// <summary>
         /// Save tare state to JSON file
         /// </summary>
-        public void SaveToFile()
+        public void SaveToFile(VehicleMode vehicleMode)
         {
             var tareData = new TareData
             {
@@ -163,7 +163,7 @@ namespace ATS_WPF.Services
                 SaveTime = DateTime.Now
             };
 
-            string path = PathHelper.GetTareConfigPath(_type); // Portable: in Data directory
+            string path = PathHelper.GetTareConfigPath(vehicleMode, _type); // Portable: in Data directory
             string jsonString = JsonSerializer.Serialize(tareData, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(path, jsonString);
         }
@@ -172,9 +172,9 @@ namespace ATS_WPF.Services
         /// Load tare state from JSON file
         /// </summary>
         /// <returns>True if loaded successfully</returns>
-        public bool LoadFromFile()
+        public bool LoadFromFile(VehicleMode vehicleMode)
         {
-            string path = PathHelper.GetTareConfigPath(_type); // Portable: in Data directory
+            string path = PathHelper.GetTareConfigPath(vehicleMode, _type); // Portable: in Data directory
             if (!File.Exists(path))
             {
                 return false;
@@ -210,9 +210,9 @@ namespace ATS_WPF.Services
         /// <summary>
         /// Delete tare configuration file
         /// </summary>
-        public void DeleteConfig()
+        public void DeleteConfig(VehicleMode vehicleMode)
         {
-            string path = PathHelper.GetTareConfigPath(_type); // Portable: in Data directory
+            string path = PathHelper.GetTareConfigPath(vehicleMode, _type); // Portable: in Data directory
             if (File.Exists(path))
             {
                 try

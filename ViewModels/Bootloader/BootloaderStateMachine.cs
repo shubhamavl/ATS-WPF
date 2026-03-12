@@ -1,5 +1,6 @@
 using System;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 
 namespace ATS_WPF.ViewModels.Bootloader
 {

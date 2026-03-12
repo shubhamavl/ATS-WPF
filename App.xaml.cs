@@ -1,10 +1,14 @@
+using System;
 using System.Windows;
 using System.IO;
 using ATS_WPF.Views;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
-using ATS_WPF.Services.CAN;
+using ATS.CAN.Engine.Services.Interfaces;
+using ATS.CAN.Engine.Services.CAN;
+using ATS.CAN.Engine.Services;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ATS_WPF
@@ -54,8 +58,9 @@ namespace ATS_WPF
             };
 
             // Initialize System Manager early to populate nodes for legacy ICANService bridge
-            var systemManager = ServiceProvider.GetRequiredService<SystemManager>();
+            // SystemManager is now instantiated in the App constructor
             var settings = ServiceProvider.GetRequiredService<ISettingsService>();
+            var systemManager = ServiceProvider.GetRequiredService<SystemManager>(); // Resolved from DI
             systemManager.Initialize(settings.Settings.VehicleMode);
 
             // Resolve and show MainWindow
@@ -83,6 +88,7 @@ namespace ATS_WPF
             // Infrastructure Services
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IDialogService, DialogService>(); // Fixed potential missing dependency
             services.AddSingleton<IUpdateService, UpdateService>();
             services.AddSingleton<IDataLoggerService, DataLogger>();
             services.AddSingleton<IProductionLoggerService>(ProductionLogger.Instance);
@@ -126,4 +132,3 @@ namespace ATS_WPF
         }
     }
 }
-

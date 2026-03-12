@@ -3,12 +3,17 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ATS_WPF.Adapters;
+using ATS.CAN.Engine.Adapters;
+using ATS.CAN.Engine.Adapters;
 using ATS_WPF.Core;
-using ATS_WPF.Core.Exceptions;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Core.Exceptions;
+using ATS.CAN.Engine.Core.Exceptions;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.Services.FirmwareUpdate;
 
+using ATS.CAN.Engine.Models;
 namespace ATS_WPF.Services
 {
     public sealed class FirmwareUpdateService : IFirmwareUpdateService

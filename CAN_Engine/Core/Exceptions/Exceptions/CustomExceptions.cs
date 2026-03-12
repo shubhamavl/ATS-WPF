@@ -1,6 +1,7 @@
+using ATS.CAN.Engine.Models;
 using System;
 
-namespace ATS_WPF.Core.Exceptions
+namespace ATS.CAN.Engine.Core.Exceptions
 {
     /// <summary>
     /// Base exception for all CAN-related errors

@@ -1,3 +1,6 @@
+using ATS_WPF.Services;
+using ATS_WPF.Models;
+using ATS_WPF.Services.Interfaces;
 using System;
 using System.IO.Ports;
 using System.Threading;
@@ -5,10 +8,11 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using ATS_WPF.Models;
-using ATS_WPF.Services;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Services;
+using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Adapters
+namespace ATS.CAN.Engine.Adapters
 {
     /// <summary>
     /// USB-CAN-A Serial adapter implementation using SerialPort
@@ -17,6 +21,10 @@ namespace ATS_WPF.Adapters
     {
         public string AdapterType => "USB-CAN-A Serial";
 
+        private readonly ICanLogger _logger;
+        private bool _isBrakeMode = false;
+        private TareManager? _tareManager;
+        private string _portName = string.Empty;
         private SerialPort? _serialPort;
         private readonly ConcurrentQueue<byte> _frameBuffer = new();
         private volatile bool _connected;
@@ -36,6 +44,11 @@ namespace ATS_WPF.Adapters
         public event Action<CANMessage>? MessageReceived;
         public event EventHandler<string>? DataTimeout;
         public event EventHandler<bool>? ConnectionStatusChanged;
+
+        public UsbSerialCanAdapter(ICanLogger? logger = null)
+        {
+            _logger = logger ?? DefaultCanLogger.Instance;
+        }
 
         public bool Connect(CanAdapterConfig config, out string errorMessage)
         {
@@ -71,6 +84,7 @@ namespace ATS_WPF.Adapters
                 _serialPort.RtsEnable = true; // Enable RTS for better USB-CAN adapter compatibility
 
                 _serialPort.Open();
+                _portName = usbConfig.PortName;
                 _connected = true;
 
                 _cancellationTokenSource = new CancellationTokenSource();
@@ -83,7 +97,7 @@ namespace ATS_WPF.Adapters
             catch (Exception ex)
             {
                 errorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
-                System.Diagnostics.Debug.WriteLine($"USB-CAN-A connection error: {ex.Message}");
+                _logger.LogError($"USB-CAN-A connection error: {ex.Message}", "UsbSerialCanAdapter");
                 _connected = false;
                 ConnectionStatusChanged?.Invoke(this, false);
                 return false;
@@ -103,7 +117,7 @@ namespace ATS_WPF.Adapters
             _cancellationTokenSource = null;
 
             ConnectionStatusChanged?.Invoke(this, false);
-            System.Diagnostics.Debug.WriteLine("USB-CAN-A Disconnected");
+            _logger.LogInfo("USB-CAN-A Disconnected", "UsbSerialCanAdapter");
         }
 
         public bool SendMessage(uint id, byte[] data)
@@ -118,14 +132,14 @@ namespace ATS_WPF.Adapters
                 // Validate CAN ID (11-bit max for standard frame)
                 if (id > MAX_CAN_ID)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Invalid CAN ID: 0x{id:X3} (max 0x{MAX_CAN_ID:X3} for standard frame)");
+                    _logger.LogWarning($"Invalid CAN ID: 0x{id:X3} (max 0x{MAX_CAN_ID:X3} for standard frame)", "UsbSerialCanAdapter");
                     return false;
                 }
 
                 // Validate data length
                 if (data != null && data.Length > 8)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Invalid data length: {data.Length} (max 8 bytes)");
+                    _logger.LogWarning($"Invalid data length: {data.Length} (max 8 bytes)", "UsbSerialCanAdapter");
                     return false;
                 }
 
@@ -140,12 +154,12 @@ namespace ATS_WPF.Adapters
                 var txMessage = new CANMessage(id, data ?? new byte[0], DateTime.Now, "TX");
                 MessageReceived?.Invoke(txMessage);
 
-                System.Diagnostics.Debug.WriteLine($"USB-CAN-A: Sent CAN frame ID=0x{id:X3}, Data={BitConverter.ToString(data ?? new byte[0])}");
+                _logger.LogDebug($"USB-CAN-A: Sent CAN frame ID=0x{id:X3}, Data={BitConverter.ToString(data ?? new byte[0])}", "UsbSerialCanAdapter");
                 return true;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Send message error: {ex.Message}");
+                _logger.LogError($"Send message error: {ex.Message}", "UsbSerialCanAdapter");
                 return false;
             }
         }
@@ -170,7 +184,7 @@ namespace ATS_WPF.Adapters
 
                         // HEX DUMP for debugging: Log raw bytes arriving from serial
                         // string hex = BitConverter.ToString(buffer, 0, count);
-                        // ProductionLogger.Instance.LogInfo($"RAW SERIAL: {hex}", "Adapter");
+                        // _logger.LogDebug($"RAW SERIAL: {hex}", "UsbSerialCanAdapter");
 
                         for (int i = 0; i < count; i++)
                         {
@@ -184,9 +198,10 @@ namespace ATS_WPF.Adapters
                         _timeoutNotified = false;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // ignore read errors for now
+                    // ignore read errors for now, but log them
+                    _logger.LogWarning($"Serial port read error: {ex.Message}", "UsbSerialCanAdapter");
                 }
 
                 // Check for timeout
@@ -194,6 +209,7 @@ namespace ATS_WPF.Adapters
                 {
                     _timeoutNotified = true;
                     DataTimeout?.Invoke(this, "Timeout");
+                    _logger.LogWarning($"Data timeout on {_portName}", "UsbSerialCanAdapter");
                 }
 
                 await Task.Delay(5, token);
@@ -304,6 +320,7 @@ namespace ATS_WPF.Adapters
                 else
                 {
                     // Invalid frame sequence, drop header and retry
+                    _logger.LogWarning($"Invalid frame footer detected. Dropping header. Raw bytes: {BitConverter.ToString(bytes.Take(Math.Min(bytes.Length, 10)).ToArray())}", "UsbSerialCanAdapter");
                     _frameBuffer.TryDequeue(out _);
                 }
             }
@@ -343,7 +360,7 @@ namespace ATS_WPF.Adapters
                         }
                     }
 
-                    // ProductionLogger.Instance.LogInfo($"Adapter RX (Var): ID=0x{canId:X} ({(isExtended?"EXT":"STD")}) Data={BitConverter.ToString(canData)}", "Adapter");
+                    _logger.LogDebug($"Adapter RX (Var): ID=0x{canId:X} ({(isExtended?"EXT":"STD")}) Data={BitConverter.ToString(canData)}", "UsbSerialCanAdapter");
                 }
                 else
                 {
@@ -358,7 +375,7 @@ namespace ATS_WPF.Adapters
             }
             catch (Exception ex)
             {
-                ProductionLogger.Instance.LogError($"Adapter Decode Error: {ex.Message}", "Adapter");
+                _logger.LogError($"Adapter Decode Error: {ex.Message}", "UsbSerialCanAdapter");
             }
         }
 

@@ -1,8 +1,8 @@
 using System;
-using ATS_WPF.Models;
-using ATS_WPF.Adapters;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Adapters;
 
-namespace ATS_WPF.Services.Interfaces
+namespace ATS.CAN.Engine.Services.Interfaces
 {
     public interface ICANService : IDisposable
     {

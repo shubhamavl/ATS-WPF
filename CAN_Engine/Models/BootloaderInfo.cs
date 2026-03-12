@@ -1,7 +1,7 @@
 using System;
-using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
-namespace ATS_WPF.Models
+namespace ATS.CAN.Engine.Models
 {
     /// <summary>
     /// Represents comprehensive bootloader and firmware information

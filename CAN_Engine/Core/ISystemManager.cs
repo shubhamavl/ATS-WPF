@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using ATS_WPF.Models;
-using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Core
+namespace ATS.CAN.Engine.Core
 {
     public interface ISystemManager
     {

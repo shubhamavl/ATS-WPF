@@ -1,5 +1,6 @@
 using System;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ATS_WPF.Core

@@ -1,6 +1,6 @@
 using System;
 
-namespace ATS_WPF.Models
+namespace ATS.CAN.Engine.Models
 {
     public enum AxleType
     {

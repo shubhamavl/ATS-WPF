@@ -1,10 +1,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using ATS_WPF.Adapters;
+using ATS.CAN.Engine.Adapters;
+using ATS.CAN.Engine.Adapters;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.ViewModels.Bootloader;
 
+using ATS.CAN.Engine.Models;
 namespace ATS_WPF.Services.Interfaces
 {
     /// <summary>

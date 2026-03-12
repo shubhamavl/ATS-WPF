@@ -1,10 +1,13 @@
-using System;
 using ATS_WPF.Services;
-using ATS_WPF.Services.Interfaces;
-
 using ATS_WPF.Models;
+using ATS_WPF.Services.Interfaces;
+using System;
+using ATS.CAN.Engine.Services;
+using ATS.CAN.Engine.Services.Interfaces;
 
-namespace ATS_WPF.Core
+using ATS.CAN.Engine.Models;
+
+namespace ATS.CAN.Engine.Core
 {
     public class AxleSystem
     {

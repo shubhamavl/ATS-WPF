@@ -1,6 +1,8 @@
 using System;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 
 namespace ATS_WPF.ViewModels.Settings

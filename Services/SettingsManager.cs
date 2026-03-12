@@ -2,15 +2,17 @@ using System;
 using System.IO;
 using System.Text.Json;
 using ATS_WPF.Models;
-using ATS_WPF.Core;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Services.Interfaces;
 
 namespace ATS_WPF.Services
 {
     /// <summary>
     /// Centralized settings manager with JSON persistence
     /// </summary>
-    public class SettingsManager : ISettingsService
+    public class SettingsManager : ISettingsService, ICanSettings
     {
         private static SettingsManager? _instance;
         private static readonly object _lock = new object();
@@ -43,6 +45,14 @@ namespace ATS_WPF.Services
         }
 
         public AppSettings Settings => _settings;
+
+        // ICanSettings Implementation
+        string ICanSettings.ComPort => _settings.ComPort;
+        string ICanSettings.LeftComPort => _settings.LeftComPort;
+        string ICanSettings.RightComPort => _settings.RightComPort;
+        ushort ICanSettings.CanBitrateKbps => GetBitrateValue(_settings.CanBaudRate);
+        byte ICanSettings.TransmissionRateCode => (byte)_settings.TransmissionRate;
+        int ICanSettings.DataTimeoutSeconds => _settings.DataTimeoutSeconds;
 
         public void LoadSettings()
         {
@@ -332,54 +342,55 @@ namespace ATS_WPF.Services
             ProductionLogger.Instance.LogInfo($"Brake settings saved: Unit={unit}, Multiplier={multiplier}", "Settings");
         }
 
-        /// <summary>
-        /// Set efficiency limits for Pass/Fail validation (removed for ATS-WPF tracking system)
-        /// </summary>
-        // Suspension-specific methods removed for ATS-WPF system
-
         // Implementation of added ISettingsService members
-        public LinearCalibration GetCalibrationDataInternal(AxleType axleType) => LinearCalibration.LoadFromFile(axleType, AdcMode.InternalWeight, SystemMode.Weight) ?? new LinearCalibration { IsValid = false };
-        public LinearCalibration GetCalibrationDataADS1115(AxleType axleType) => LinearCalibration.LoadFromFile(axleType, AdcMode.Ads1115, SystemMode.Weight) ?? new LinearCalibration { IsValid = false };
+        public LinearCalibration GetCalibrationDataInternal(AxleType axleType) => LinearCalibration.LoadFromFile(_settings.VehicleMode, axleType, AdcMode.InternalWeight, SystemMode.Weight) ?? new LinearCalibration { IsValid = false };
+        public LinearCalibration GetCalibrationDataADS1115(AxleType axleType) => LinearCalibration.LoadFromFile(_settings.VehicleMode, axleType, AdcMode.Ads1115, SystemMode.Weight) ?? new LinearCalibration { IsValid = false };
 
-        public LinearCalibration GetCalibrationDataInternalBrake(AxleType axleType) => LinearCalibration.LoadFromFile(axleType, AdcMode.InternalWeight, SystemMode.Brake) ?? new LinearCalibration { IsValid = false };
-        public LinearCalibration GetCalibrationDataADS1115Brake(AxleType axleType) => LinearCalibration.LoadFromFile(axleType, AdcMode.Ads1115, SystemMode.Brake) ?? new LinearCalibration { IsValid = false };
+        public LinearCalibration GetCalibrationDataInternalBrake(AxleType axleType) => LinearCalibration.LoadFromFile(_settings.VehicleMode, axleType, AdcMode.InternalWeight, SystemMode.Brake) ?? new LinearCalibration { IsValid = false };
+        public LinearCalibration GetCalibrationDataADS1115Brake(AxleType axleType) => LinearCalibration.LoadFromFile(_settings.VehicleMode, axleType, AdcMode.Ads1115, SystemMode.Brake) ?? new LinearCalibration { IsValid = false };
 
         public string GetCalibrationFilePath(AxleType axleType, bool adcMode)
         {
-            return PathHelper.GetCalibrationPath(axleType, adcMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Weight);
+            return PathHelper.GetCalibrationPath(_settings.VehicleMode, axleType, adcMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Weight);
         }
 
         public string GetCalibrationBrakeFilePath(AxleType axleType, bool adcMode)
         {
-            return PathHelper.GetCalibrationPath(axleType, adcMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Brake);
+            return PathHelper.GetCalibrationPath(_settings.VehicleMode, axleType, adcMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Brake);
         }
 
         public string GetTareFilePath(AxleType axleType)
         {
-            return PathHelper.GetTareConfigPath(axleType);
+            return PathHelper.GetTareConfigPath(_settings.VehicleMode, axleType);
         }
 
         public void ResetCalibration(AxleType axleType, bool adsMode)
         {
-            LinearCalibration.DeleteCalibration(axleType, adsMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Weight);
+            LinearCalibration.DeleteCalibration(_settings.VehicleMode, axleType, adsMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Weight);
         }
 
         public void ResetBrakeCalibration(AxleType axleType, bool adsMode)
         {
-            LinearCalibration.DeleteCalibration(axleType, adsMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Brake);
+            LinearCalibration.DeleteCalibration(_settings.VehicleMode, axleType, adsMode ? AdcMode.Ads1115 : AdcMode.InternalWeight, SystemMode.Brake);
         }
 
         public double TareValue
         {
             get
             {
-                // Simple implementation: load from file or return 0
-                // Since SettingsManager doesn't hold TareManager, we can just check the file
-                // But TareBaseline in view usually wants the current active one.
-                // For simplicity, we'll return 0 or load from file.
-                return 0; // Better to have TareManager handle this, but for compilation:
+                return 0; 
             }
+        }
+        private ushort GetBitrateValue(CanBaudRate baudRate)
+        {
+            return baudRate switch
+            {
+                CanBaudRate.Bps1M => 1000,
+                CanBaudRate.Bps500k => 500,
+                CanBaudRate.Bps250k => 250,
+                CanBaudRate.Bps125k => 125,
+                _ => 500
+            };
         }
     }
 }
-

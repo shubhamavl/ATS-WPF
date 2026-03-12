@@ -5,11 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.Core;
-using ATS_WPF.Adapters;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Adapters;
+using ATS.CAN.Engine.Adapters;
 
 namespace ATS_WPF.ViewModels
 {
@@ -347,8 +351,9 @@ namespace ATS_WPF.ViewModels
             try
             {
                 // Temporary hardcode to AxleType.Total until Phase 3 Dynamic UI provides the specific AxleViewModel
-                _internalCalResult.SaveToFile(AxleType.Total);
-                _ads1115CalResult.SaveToFile(AxleType.Total);
+                _internalCalResult.SaveToFile(_settings.Settings.VehicleMode, AxleType.Total);
+                _ads1115CalResult.SaveToFile(_settings.Settings.VehicleMode, AxleType.Total);
+
 
                 _weightProcessor.LoadCalibration();
                 _dialogService.ShowMessage("Calibration saved and applied to system.", "Success");

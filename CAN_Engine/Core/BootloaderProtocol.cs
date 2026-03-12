@@ -1,4 +1,5 @@
-namespace ATS_WPF.Core
+using ATS.CAN.Engine.Models;
+namespace ATS.CAN.Engine.Core
 {
     // Bootloader status enum (public for use in models)
     public enum BootloaderStatus : byte

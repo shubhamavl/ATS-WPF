@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 
 namespace ATS_WPF.Models
 {

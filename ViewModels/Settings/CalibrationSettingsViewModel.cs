@@ -1,7 +1,10 @@
 using System;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 
 namespace ATS_WPF.ViewModels.Settings
@@ -157,12 +160,12 @@ namespace ATS_WPF.ViewModels.Settings
 
         #region Calibration Data Display
 
-        public string InternalStatus => _internalCal?.IsValid == true ? "✓ Valid" : "⚠ Not Calibrated";
+        public string InternalStatus => _internalCal?.IsValid == true ? "\u2713 Valid" : "\u26a0 Not Calibrated";
         public string InternalSlope => _internalCal?.Slope.ToString("F6") ?? "N/A";
         public string InternalIntercept => _internalCal?.Intercept.ToString("F6") ?? "N/A";
         public string InternalDate => _internalCal?.CalibrationDate.ToString("yyyy-MM-dd HH:mm:ss") ?? "N/A";
 
-        public string AdsStatus => _adsCal?.IsValid == true ? "✓ Valid" : "⚠ Not Calibrated";
+        public string AdsStatus => _adsCal?.IsValid == true ? "\u2713 Valid" : "\u26a0 Not Calibrated";
         public string AdsSlope => _adsCal?.Slope.ToString("F6") ?? "N/A";
         public string AdsIntercept => _adsCal?.Intercept.ToString("F6") ?? "N/A";
         public string AdsDate => _adsCal?.CalibrationDate.ToString("yyyy-MM-dd HH:mm:ss") ?? "N/A";
@@ -171,8 +174,8 @@ namespace ATS_WPF.ViewModels.Settings
 
         public void RefreshCalibrationData()
         {
-            _internalCal = LinearCalibration.LoadFromFile(AxleType.Total, AdcMode.InternalWeight, SystemMode.Weight);
-            _adsCal = LinearCalibration.LoadFromFile(AxleType.Total, AdcMode.Ads1115, SystemMode.Weight);
+            _internalCal = LinearCalibration.LoadFromFile(_settingsManager.Settings.VehicleMode, AxleType.Total, AdcMode.InternalWeight, SystemMode.Weight);
+            _adsCal = LinearCalibration.LoadFromFile(_settingsManager.Settings.VehicleMode, AxleType.Total, AdcMode.Ads1115, SystemMode.Weight);
 
             OnPropertyChanged(nameof(InternalStatus));
             OnPropertyChanged(nameof(InternalSlope));
@@ -185,4 +188,3 @@ namespace ATS_WPF.ViewModels.Settings
         }
     }
 }
-

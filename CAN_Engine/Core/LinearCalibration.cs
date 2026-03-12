@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
-namespace ATS_WPF.Core
+namespace ATS.CAN.Engine.Core
 {
     /// <summary>
     /// Represents a single segment in piecewise linear calibration
@@ -365,14 +365,14 @@ namespace ATS_WPF.Core
         /// </summary>
         /// <param name="axleType">The type of the axle</param>
         /// <param name="adcMode">Optional ADC mode (if changed from object property)</param>
-        public void SaveToFile(AxleType axleType, AdcMode? adcMode = null)
+        public void SaveToFile(VehicleMode vehicleMode, AxleType axleType, AdcMode? adcMode = null)
         {
             Side = SystemMode == SystemMode.Brake ? "Brake" : axleType.ToString();
             if (adcMode.HasValue)
             {
                 ADCMode = adcMode.Value;
             }
-            string filename = PathHelper.GetCalibrationPath(axleType, ADCMode, SystemMode); // Portable: in Data directory
+            string filename = PathHelper.GetCalibrationPath(vehicleMode, axleType, ADCMode, SystemMode); // Portable: in Data directory
             string jsonString = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filename, jsonString);
         }
@@ -384,9 +384,9 @@ namespace ATS_WPF.Core
         /// <param name="adcMode">ADC mode for the file name</param>
         /// <param name="systemMode">Weight or Brake mode</param>
         /// <returns>Calibration object or null if failed/not exists</returns>
-        public static LinearCalibration? LoadFromFile(AxleType axleType, AdcMode adcMode, SystemMode systemMode = SystemMode.Weight)
+        public static LinearCalibration? LoadFromFile(VehicleMode vehicleMode, AxleType axleType, AdcMode adcMode, SystemMode systemMode = SystemMode.Weight)
         {
-            string filename = PathHelper.GetCalibrationPath(axleType, adcMode, systemMode); // Portable: in Data directory
+            string filename = PathHelper.GetCalibrationPath(vehicleMode, axleType, adcMode, systemMode); // Portable: in Data directory
             if (!File.Exists(filename))
             {
                 return null;
@@ -427,9 +427,9 @@ namespace ATS_WPF.Core
         /// <param name="adcMode">ADC mode for the file name</param>
         /// <param name="systemMode">Weight or Brake mode</param>
         /// <returns>True if calibration exists</returns>
-        public static bool CalibrationExists(AxleType axleType, AdcMode adcMode, SystemMode systemMode = SystemMode.Weight)
+        public static bool CalibrationExists(VehicleMode vehicleMode, AxleType axleType, AdcMode adcMode, SystemMode systemMode = SystemMode.Weight)
         {
-            string filename = PathHelper.GetCalibrationPath(axleType, adcMode, systemMode); // Portable: in Data directory
+            string filename = PathHelper.GetCalibrationPath(vehicleMode, axleType, adcMode, systemMode); // Portable: in Data directory
             return File.Exists(filename);
         }
 
@@ -439,9 +439,9 @@ namespace ATS_WPF.Core
         /// <param name="axleType">The type of the axle</param>
         /// <param name="adcMode">ADC mode for the file name</param>
         /// <param name="systemMode">Weight or Brake mode</param>
-        public static void DeleteCalibration(AxleType axleType, AdcMode adcMode, SystemMode systemMode = SystemMode.Weight)
+        public static void DeleteCalibration(VehicleMode vehicleMode, AxleType axleType, AdcMode adcMode, SystemMode systemMode = SystemMode.Weight)
         {
-            string filename = PathHelper.GetCalibrationPath(axleType, adcMode, systemMode); // Portable: in Data directory
+            string filename = PathHelper.GetCalibrationPath(vehicleMode, axleType, adcMode, systemMode); // Portable: in Data directory
             if (File.Exists(filename))
             {
                 try

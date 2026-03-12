@@ -1,4 +1,5 @@
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.Services.Interfaces
 {

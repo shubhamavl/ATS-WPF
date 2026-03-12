@@ -1,3 +1,6 @@
+using ATS_WPF.Services;
+using ATS_WPF.Models;
+using ATS_WPF.Services.Interfaces;
 using System;
 using System.IO;
 using System.IO.Ports;
@@ -6,17 +9,17 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
-using ATS_WPF.Models;
-using ATS_WPF.Adapters;
-using ATS_WPF.Core;
-using ATS_WPF.Services.CAN;
-using ATS_WPF.Services.Interfaces;
-using ATS_WPF.Core.Exceptions;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Adapters;
+using ATS.CAN.Engine.Core;
+using ATS.CAN.Engine.Services.CAN;
+using ATS.CAN.Engine.Services.Interfaces;
+using ATS.CAN.Engine.Core.Exceptions;
 
 using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("ATS_WPF.Tests")]
 
-namespace ATS_WPF.Services
+namespace ATS.CAN.Engine.Services
 {
 
     // USB-CAN-A Binary Protocol Implementation for ATS Two-Wheeler System
@@ -102,9 +105,11 @@ namespace ATS_WPF.Services
 
         private ICanAdapter? _adapter;
         private readonly CANEventDispatcher _eventDispatcher;
+        private readonly ICanLogger _logger;
 
-        public CANService()
+        public CANService(ICanLogger? logger = null)
         {
+            _logger = logger ?? DefaultCanLogger.Instance;
             _connected = false;
             _eventDispatcher = new CANEventDispatcher();
 
@@ -129,7 +134,7 @@ namespace ATS_WPF.Services
         private void UpdateTimeoutFromSettings(int seconds)
         {
             _timeout = TimeSpan.FromSeconds(seconds);
-            ProductionLogger.Instance.LogInfo($"CAN timeout updated: {seconds}s", "CANService");
+            _logger.LogInfo($"CAN timeout updated: {seconds}s", "CANService");
         }
 
         /// <summary>
@@ -160,21 +165,26 @@ namespace ATS_WPF.Services
 
             if (config is UsbSerialCanAdapterConfig)
             {
-                adapter = new UsbSerialCanAdapter();
+                adapter = new UsbSerialCanAdapter(_logger);
             }
             else if (config is PcanCanAdapterConfig)
             {
-                adapter = new PcanCanAdapter();
+                adapter = new PcanCanAdapter(_logger);
             }
             else
             {
                 errorMessage = "Unknown adapter configuration type";
+                _logger.LogError($"Connection failed: {errorMessage}", "CANService");
                 return false;
             }
 
             SetAdapter(adapter);
             bool result = adapter.Connect(config, out errorMessage);
             _connected = result;
+            if (!result)
+            {
+                _logger.LogError($"Connection failed: {errorMessage}", "CANService");
+            }
             return result;
         }
 
@@ -221,25 +231,25 @@ namespace ATS_WPF.Services
                 _cancellationTokenSource = new CancellationTokenSource();
                 Task.Run(() => ReadMessagesAsync(_cancellationTokenSource.Token));
 
-                ProductionLogger.Instance.LogInfo($"USB-CAN-A Connected on {portName}", "CANService");
+                _logger.LogInfo($"USB-CAN-A Connected on {portName}", "CANService");
                 return true;
             }
             catch (UnauthorizedAccessException ex)
             {
                 message = "Access denied to COM port. It may be in use by another application.";
-                ProductionLogger.Instance.LogError($"CAN connection error: {message} - {ex.Message}", "CANService");
+                _logger.LogError($"CAN connection error: {message} - {ex.Message}", "CANService");
                 return false;
             }
             catch (IOException ex)
             {
                 message = "IO error while opening COM port.";
-                ProductionLogger.Instance.LogError($"CAN connection error: {message} - {ex.Message}", "CANService");
+                _logger.LogError($"CAN connection error: {message} - {ex.Message}", "CANService");
                 return false;
             }
             catch (Exception ex)
             {
                 message = ex.Message;
-                ProductionLogger.Instance.LogError($"CAN connection error: {ex.Message}", "CANService");
+                _logger.LogError($"CAN connection error: {ex.Message}", "CANService");
                 throw new CANConnectionException(portName, ex.Message, ex);
             }
         }
@@ -259,6 +269,7 @@ namespace ATS_WPF.Services
                                                   " CH341 driver is installed\n" +
                                                   " Device appears in Device Manager",
                                                   "COM Port Not Found");
+                    _logger.LogWarning("No COM ports found for auto-connect.", "CANService");
                     return false;
                 }
 
@@ -269,17 +280,17 @@ namespace ATS_WPF.Services
             }
             catch (UnauthorizedAccessException ex)
             {
-                ProductionLogger.Instance.LogError($"Auto-connect access denied: {ex.Message}", "CANService");
+                _logger.LogError($"Auto-connect access denied: {ex.Message}", "CANService");
                 throw new CANConnectionException("Auto", "Access denied", ex);
             }
             catch (IOException ex)
             {
-                ProductionLogger.Instance.LogError($"Auto-connect IO error: {ex.Message}", "CANService");
+                _logger.LogError($"Auto-connect IO error: {ex.Message}", "CANService");
                 throw new CANConnectionException("Auto", "IO Error", ex);
             }
             catch (Exception ex)
             {
-                ProductionLogger.Instance.LogError($"USB-CAN-A connection error: {ex.Message}", "CANService");
+                _logger.LogError($"USB-CAN-A connection error: {ex.Message}", "CANService");
                 throw new CANConnectionException("Auto", ex.Message, ex);
             }
         }
@@ -297,7 +308,7 @@ namespace ATS_WPF.Services
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = null;
 
-            ProductionLogger.Instance.LogInfo("USB-CAN-A Disconnected", "CANService");
+            _logger.LogInfo("USB-CAN-A Disconnected", "CANService");
         }
 
         private async Task ReadMessagesAsync(CancellationToken token)
@@ -332,12 +343,12 @@ namespace ATS_WPF.Services
                 catch (IOException ex)
                 {
                     // Log IO errors (device disconnected, etc)
-                    ProductionLogger.Instance.LogWarning($"Serial read error: {ex.Message}", "CANService");
+                    _logger.LogWarning($"Serial read error: {ex.Message}", "CANService");
                     await Task.Delay(100, token); // Throttle loop on error
                 }
                 catch (Exception ex)
                 {
-                    ProductionLogger.Instance.LogError($"Unexpected serial error: {ex.Message}", "CANService");
+                    _logger.LogError($"Unexpected serial error: {ex.Message}", "CANService");
                 }
 
                 // Check for timeout
@@ -410,11 +421,11 @@ namespace ATS_WPF.Services
             }
             catch (ArgumentException ex)
             {
-                ProductionLogger.Instance.LogError($"Frame data error: {ex.Message}", "CANService");
+                _logger.LogError($"Frame data error: {ex.Message}", "CANService");
             }
             catch (Exception ex)
             {
-                ProductionLogger.Instance.LogError($"Decode error: {ex.Message}", "CANService");
+                _logger.LogError($"Decode error: {ex.Message}", "CANService");
                 throw new CANException($"Failed to decode CAN frame: {ex.Message}", ex);
             }
         }
@@ -433,20 +444,20 @@ namespace ATS_WPF.Services
                 // Validate CAN ID (11-bit max for standard frame)
                 if (id > MAX_CAN_ID)
                 {
-                    ProductionLogger.Instance.LogWarning($"Invalid CAN ID: 0x{id:X3} (max 0x{MAX_CAN_ID:X3} for standard frame)", "CANService");
+                    _logger.LogWarning($"Invalid CAN ID: 0x{id:X3} (max 0x{MAX_CAN_ID:X3} for standard frame)", "CANService");
                     return false;
                 }
 
                 // Validate data length
                 if (data != null && data.Length > 8)
                 {
-                    ProductionLogger.Instance.LogWarning($"Invalid data length: {data.Length} (max 8 bytes)", "CANService");
+                    _logger.LogWarning($"Invalid data length: {data.Length} (max 8 bytes)", "CANService");
                     return false;
                 }
 
                 if (data == null)
                 {
-                    ProductionLogger.Instance.LogWarning("Cannot send message: data is null", "CANService");
+                    _logger.LogWarning("Cannot send message: data is null", "CANService");
                     return false;
                 }
 
@@ -611,94 +622,6 @@ namespace ATS_WPF.Services
         }
 
     }  // Class closing brace
-
-    public class RawDataEventArgs : EventArgs
-    {
-        public string SideTag { get; set; } = string.Empty; 
-        public uint CanId { get; set; }
-        public int RawADCSum { get; set; }
-        public DateTime TimestampFull { get; set; } // PC reception timestamp
-    }
-
-    public class SystemStatusEventArgs : EventArgs
-    {
-        public SystemStatus SystemStatus { get; set; }      // 0=OK, 1=Warning, 2=Error
-        public byte ErrorFlags { get; set; }        // Error flags
-        public AdcMode ADCMode { get; set; }        // Current ADC mode
-        public SystemMode RelayState { get; set; }        // Current relay state (0=Weight, 1=Brake)
-        public uint UptimeSeconds { get; set; }     // System uptime in seconds
-        public DateTime Timestamp { get; set; }     // PC3 reception timestamp
-    }
-
-    public class PerformanceMetricsEventArgs : EventArgs
-    {
-        public ushort CanTxHz { get; set; }        // CAN transmission frequency
-        public ushort AdcSampleHz { get; set; }    // ADC sampling frequency
-        public DateTime Timestamp { get; set; }     // PC3 reception timestamp
-    }
-
-    public class FirmwareVersionEventArgs : EventArgs
-    {
-        public byte Major { get; set; }              // Major version number
-        public byte Minor { get; set; }              // Minor version number
-        public byte Patch { get; set; }              // Patch version number
-        public byte Build { get; set; }              // Build number
-        public DateTime Timestamp { get; set; }      // PC3 reception timestamp
-
-        public string VersionString => $"{Major}.{Minor}.{Patch}";
-        public string VersionStringFull => $"{Major}.{Minor}.{Patch}.{Build}";
-    }
-
-    public class BootPingResponseEventArgs : EventArgs
-    {
-        public DateTime Timestamp { get; set; }
-    }
-
-    public class BootBeginResponseEventArgs : EventArgs
-    {
-        public BootloaderStatus Status { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
-
-    public class BootProgressEventArgs : EventArgs
-    {
-        public byte Percent { get; set; }
-        public uint BytesReceived { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
-
-    public class BootEndResponseEventArgs : EventArgs
-    {
-        public BootloaderStatus Status { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
-
-    public class BootErrorEventArgs : EventArgs
-    {
-        public uint CanId { get; set; }
-        public byte[]? RawData { get; set; }
-        public DateTime Timestamp { get; set; }
-        public string Message => RawData != null ? BootloaderProtocol.ParseErrorMessage(CanId, RawData) : "Unknown Error";
-    }
-
-    public class BootQueryResponseEventArgs : EventArgs
-    {
-        public bool Present { get; set; }
-        public byte Major { get; set; }
-        public byte Minor { get; set; }
-        public byte Patch { get; set; }
-        public byte ActiveBank { get; set; }
-        public byte BankAValid { get; set; }
-        public byte BankBValid { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
-
-    public class CANErrorEventArgs : EventArgs
-    {
-        public string? ErrorMessage { get; set; }
-        public int ErrorCode { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
 
 }  // Namespace closing brace
 

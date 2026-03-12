@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.Core
 {

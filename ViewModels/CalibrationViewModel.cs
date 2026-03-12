@@ -2,9 +2,12 @@ using System;
 using System.Windows.Input;
 using System.Windows;
 using ATS_WPF.Services.Interfaces;
+using ATS.CAN.Engine.Services.Interfaces;
 using ATS_WPF.ViewModels.Base;
 using ATS_WPF.Core;
+using ATS.CAN.Engine.Core;
 using ATS_WPF.Models;
+using ATS.CAN.Engine.Models;
 
 namespace ATS_WPF.ViewModels
 {
@@ -93,7 +96,7 @@ namespace ATS_WPF.ViewModels
                 "Reset Calibration", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 // Temporary hardcode to AxleType.Total until Phase 3 Dynamic UI provides the specific AxleViewModel
-                LinearCalibration.DeleteCalibration(AxleType.Total, _canService.CurrentADCMode, SystemModeText == "Brake" ? SystemMode.Brake : SystemMode.Weight);
+                LinearCalibration.DeleteCalibration(_settings.Settings.VehicleMode, AxleType.Total, _canService.CurrentADCMode, SystemModeText == "Brake" ? SystemMode.Brake : SystemMode.Weight);
                 _weightProcessor.LoadCalibration();
             }
         }
@@ -105,8 +108,6 @@ namespace ATS_WPF.ViewModels
 
         private void OnSwitchSystemMode(object? parameter)
         {
-            // Toggle system mode (Weight vs Brake)
-            // SystemStatusPanelViewModel usually updates UI based on CAN response
             bool targetBrakeMode = SystemModeText == "Weight"; // If current is Weight, switch to Brake
             _canService.SwitchSystemMode(targetBrakeMode ? SystemMode.Brake : SystemMode.Weight);
         }
@@ -123,8 +124,6 @@ namespace ATS_WPF.ViewModels
             }
         }
 
-
-
         public void UpdateSystemStatus(AdcMode adcMode, SystemMode systemMode)
         {
             AdcModeText = adcMode == AdcMode.Ads1115 ? "ADS1115" : "Internal";
@@ -133,4 +132,3 @@ namespace ATS_WPF.ViewModels
         }
     }
 }
-

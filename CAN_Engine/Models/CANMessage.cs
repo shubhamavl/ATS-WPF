@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 
-namespace ATS_WPF.Models
+namespace ATS.CAN.Engine.Models
 {
     // CAN Message data structure
     public class CANMessage
