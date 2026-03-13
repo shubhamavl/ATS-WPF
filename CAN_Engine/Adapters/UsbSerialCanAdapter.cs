@@ -426,6 +426,11 @@ namespace ATS.CAN.Engine.Adapters
                     return true;
 
                 default:
+                    // Support shifted IDs for Node 2 (+0x80)
+                    if (canId >= 0x0B0 && canId <= 0x0DF) return true; // Shifted Commands/Requests
+                    if (canId >= 0x280 && canId <= 0x29F) return true; // Shifted Raw Data
+                    if (canId >= 0x380 && canId <= 0x3AF) return true; // Shifted Status/Version/Perf/Lmv
+                    if (canId >= 0x590 && canId <= 0x5AF) return true; // Shifted Bootloader
                     return false;
             }
         }

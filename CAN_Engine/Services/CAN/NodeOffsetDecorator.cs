@@ -26,8 +26,8 @@ namespace ATS.CAN.Engine.Services.CAN
             
             if (nodeId == 2)
             {
-                _rxOffset = 0x10;
-                _txOffset = 2;
+                _rxOffset = 0x80;
+                _txOffset = 0x80;
             }
             else
             {

@@ -26,20 +26,14 @@ namespace ATS.CAN.Engine.Services
         {
             // 1. Check if it's a base system ID (Node 1)
             if (IsBaseSystemId(canId)) return true;
-
-            // 2. Check if it's a shifted Telemetry ID (Node 2, +0x10)
-            if (canId >= 0x210 && canId <= 0x320)
+ 
+            // 2. Check if it's a shifted ID (Node 2, +0x80)
+            // Range check covers Commands (0x30+0x80=0xB0) through Status (0x300+0x80=0x380) and Bootloader (0x510+0x80=0x590)
+            if (canId >= 0x080 && canId <= 0x5D0)
             {
-                if (IsBaseSystemId(canId - 0x10)) return true;
+                if (IsBaseSystemId(canId - 0x80)) return true;
             }
-
-            // 3. Check if it's a shifted Command ID (Node 2, +0x02)
-            // (Note: PC usually doesn't receive these, but good for loopback/sniffer)
-            if (canId >= 0x032 && canId <= 0x062)
-            {
-                if (IsBaseSystemId(canId - 2)) return true;
-            }
-
+ 
             return false;
         }
 
