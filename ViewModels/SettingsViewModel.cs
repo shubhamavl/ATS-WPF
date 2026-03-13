@@ -200,9 +200,9 @@ namespace ATS_WPF.ViewModels
             {
                 try
                 {
-                    LinearCalibration.DeleteCalibration(_settingsManager.Settings.VehicleMode, AxleType.Total, mode, SystemMode.Weight);
+                    LinearCalibration.DeleteCalibration(_settingsManager.Settings.VehicleMode, Calibration.ActiveAxleType, mode, SystemMode.Weight);
                     Calibration.RefreshCalibrationData();
-                    MessageBox.Show("Calibration deleted.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Calibration for {Calibration.ActiveAxleType} deleted.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (IOException ex)
                 {

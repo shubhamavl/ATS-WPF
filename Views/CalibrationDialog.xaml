@@ -196,8 +196,13 @@
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="{Binding DialogTitle}" 
                                        FontSize="20" FontWeight="Bold" Foreground="White"/>
-                            <TextBlock Text="{Binding DialogSubtitle}" 
-                                       FontSize="12" Foreground="#FFE3F2FD"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding DialogSubtitle}" 
+                                           FontSize="12" Foreground="#FFE3F2FD"/>
+                                <TextBlock Text=" | " FontSize="12" Foreground="#FFE3F2FD"/>
+                                <TextBlock Text="{Binding AxleHeader}" 
+                                           FontSize="12" FontWeight="Bold" Foreground="#FFFFEB3B"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>

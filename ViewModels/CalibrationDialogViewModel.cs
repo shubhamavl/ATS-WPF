@@ -26,11 +26,11 @@ namespace ATS_WPF.ViewModels
         private LinearCalibration? _internalCalResult;
         private LinearCalibration? _ads1115CalResult;
 
-        private byte _adcMode;
         private bool _isBrakeMode;
         private int _calibrationDelayMs;
         private bool _isCapturingDualMode;
         private int _currentRawADC;
+        private AxleType _axleType;
 
         public event EventHandler? RequestClose;
         public event EventHandler<CalibrationDialogResultsEventArgs>? CalculationCompleted;
@@ -61,8 +61,9 @@ namespace ATS_WPF.ViewModels
         public string TargetUnit => "Kilograms (kg)";
         public string InputUnitHeader => "Input (kg) → Target (kg)";
 
-        public string DialogTitle => _isBrakeMode ? "Brake Force Calibration" : "Total Weight Calibration";
         public string DialogSubtitle => _isBrakeMode ? "Brake Force Measurement System" : "Hardware Calibration Process";
+
+        public string AxleHeader => $"Axle: {_axleType}";
 
         public ICommand AddPointCommand { get; }
         public ICommand RemovePointCommand { get; }
@@ -73,13 +74,14 @@ namespace ATS_WPF.ViewModels
         public ICommand SavePointCommand { get; }
         public ICommand CancelPointCommand { get; }
 
-        public CalibrationDialogViewModel(ICANService canService, ISettingsService settings, IDialogService dialogService, IProductionLoggerService logger, IWeightProcessorService weightProcessor, byte adcMode = 0, int calibrationDelayMs = 500, bool isBrakeMode = false)
+        public CalibrationDialogViewModel(ICANService canService, ISettingsService settings, IDialogService dialogService, IProductionLoggerService logger, IWeightProcessorService weightProcessor, AxleType axleType, byte adcMode = 0, int calibrationDelayMs = 500, bool isBrakeMode = false)
         {
             _canService = canService;
             _settings = settings;
             _dialogService = dialogService;
             _logger = logger;
             _weightProcessor = weightProcessor;
+            _axleType = axleType;
             _adcMode = adcMode;
             _calibrationDelayMs = calibrationDelayMs;
             _isBrakeMode = isBrakeMode;
@@ -349,9 +351,8 @@ namespace ATS_WPF.ViewModels
 
             try
             {
-                // Temporary hardcode to AxleType.Total until Phase 3 Dynamic UI provides the specific AxleViewModel
-                _internalCalResult.SaveToFile(_settings.Settings.VehicleMode, AxleType.Total);
-                _ads1115CalResult.SaveToFile(_settings.Settings.VehicleMode, AxleType.Total);
+                _internalCalResult.SaveToFile(_settings.Settings.VehicleMode, _axleType);
+                _ads1115CalResult.SaveToFile(_settings.Settings.VehicleMode, _axleType);
 
 
                 _weightProcessor.LoadCalibration();

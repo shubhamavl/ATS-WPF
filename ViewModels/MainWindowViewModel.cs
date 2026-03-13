@@ -254,6 +254,10 @@ namespace ATS_WPF.ViewModels
 
         private void OnOpenSettings()
         {
+            if (ActiveAxle != null)
+            {
+                Settings.Calibration.ActiveAxleType = ActiveAxle.Type;
+            }
             OpenSettingsRequested?.Invoke();
         }
 

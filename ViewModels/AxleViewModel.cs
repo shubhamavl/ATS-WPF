@@ -26,7 +26,7 @@ namespace ATS_WPF.ViewModels
             _axleSystem = axleSystem;
 
             Dashboard = new DashboardViewModel(_axleSystem.WeightProcessor, _axleSystem.PrimaryNode.CanService, settings);
-            Calibration = new CalibrationViewModel(_axleSystem.WeightProcessor, _axleSystem.PrimaryNode.CanService, settings, navigationService);
+            Calibration = new CalibrationViewModel(_axleSystem.Type, _axleSystem.WeightProcessor, _axleSystem.PrimaryNode.CanService, settings, navigationService);
         }
 
         public void Refresh()

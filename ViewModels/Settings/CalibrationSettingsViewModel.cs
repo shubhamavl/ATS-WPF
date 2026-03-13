@@ -17,6 +17,22 @@ namespace ATS_WPF.ViewModels.Settings
         private readonly ISettingsService _settingsManager;
         private LinearCalibration? _internalCal;
         private LinearCalibration? _adsCal;
+        private AxleType _activeAxleType = AxleType.Total;
+
+        public AxleType ActiveAxleType
+        {
+            get => _activeAxleType;
+            set
+            {
+                if (SetProperty(ref _activeAxleType, value))
+                {
+                    RefreshCalibrationData();
+                    OnPropertyChanged(nameof(CurrentAxleName));
+                }
+            }
+        }
+
+        public string CurrentAxleName => _activeAxleType.ToString();
 
         public CalibrationSettingsViewModel(ISettingsService settingsManager)
         {
@@ -174,8 +190,8 @@ namespace ATS_WPF.ViewModels.Settings
 
         public void RefreshCalibrationData()
         {
-            _internalCal = LinearCalibration.LoadFromFile(_settingsManager.Settings.VehicleMode, AxleType.Total, AdcMode.InternalWeight, SystemMode.Weight);
-            _adsCal = LinearCalibration.LoadFromFile(_settingsManager.Settings.VehicleMode, AxleType.Total, AdcMode.Ads1115, SystemMode.Weight);
+            _internalCal = LinearCalibration.LoadFromFile(_settingsManager.Settings.VehicleMode, _activeAxleType, AdcMode.InternalWeight, SystemMode.Weight);
+            _adsCal = LinearCalibration.LoadFromFile(_settingsManager.Settings.VehicleMode, _activeAxleType, AdcMode.Ads1115, SystemMode.Weight);
 
             OnPropertyChanged(nameof(InternalStatus));
             OnPropertyChanged(nameof(InternalSlope));

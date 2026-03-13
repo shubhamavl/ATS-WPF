@@ -156,6 +156,9 @@
                                               Width="120"/>
                                 </StackPanel>
                                 
+                                <TextBlock Text="{Binding Calibration.CurrentAxleName, StringFormat='Active Axle: {0}'}" 
+                                           FontWeight="Bold" Foreground="#FF1B5E96" Margin="0,0,0,10" HorizontalAlignment="Right"/>
+                                
                                 <Grid Margin="0,0,0,10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>

@@ -17,6 +17,7 @@ namespace ATS_WPF.ViewModels
         private readonly ICANService _canService;
         private readonly ISettingsService _settings;
         private readonly INavigationService _navigationService;
+        private readonly AxleType _axleType;
 
         private string _calStatusText = "Uncalibrated";
         public string CalStatusText
@@ -60,8 +61,9 @@ namespace ATS_WPF.ViewModels
         public ICommand SwitchSystemModeCommand { get; }
         public ICommand SwitchAdcModeCommand { get; }
 
-        public CalibrationViewModel(IWeightProcessorService weightProcessor, ICANService canService, ISettingsService settings, INavigationService navigationService)
+        public CalibrationViewModel(AxleType axleType, IWeightProcessorService weightProcessor, ICANService canService, ISettingsService settings, INavigationService navigationService)
         {
+            _axleType = axleType;
             _weightProcessor = weightProcessor;
             _canService = canService;
             _settings = settings;
@@ -87,16 +89,15 @@ namespace ATS_WPF.ViewModels
 
         private void OnCalibrate(object? parameter)
         {
-            _navigationService.ShowCalibrationDialog(IsBrakeMode);
+            _navigationService.ShowCalibrationDialog(_axleType, _weightProcessor, IsBrakeMode);
         }
 
         private void OnResetCalibration(object? parameter)
         {
-            if (MessageBox.Show("Are you sure you want to reset calibration? This will delete the current calibration file.",
+            if (MessageBox.Show($"Are you sure you want to reset calibration for {_axleType}? This will delete the current calibration file.",
                 "Reset Calibration", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
-                // Temporary hardcode to AxleType.Total until Phase 3 Dynamic UI provides the specific AxleViewModel
-                LinearCalibration.DeleteCalibration(_settings.Settings.VehicleMode, AxleType.Total, _canService.CurrentADCMode, SystemModeText == "Brake" ? SystemMode.Brake : SystemMode.Weight);
+                LinearCalibration.DeleteCalibration(_settings.Settings.VehicleMode, _axleType, _canService.CurrentADCMode, SystemModeText == "Brake" ? SystemMode.Brake : SystemMode.Weight);
                 _weightProcessor.LoadCalibration();
             }
         }

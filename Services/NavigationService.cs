@@ -35,15 +35,14 @@ namespace ATS_WPF.Services
 
 
 
-        public void ShowCalibrationDialog(bool isBrakeMode = false)
+        public void ShowCalibrationDialog(AxleType axleType, IWeightProcessorService weightProcessor, bool isBrakeMode = false)
         {
             var canService = ServiceRegistry.GetService<ICANService>();
             var settings = ServiceRegistry.GetService<ISettingsService>();
             var dialogService = ServiceRegistry.GetService<IDialogService>();
             var logger = ServiceRegistry.GetService<IProductionLoggerService>();
-            var weightProcessor = ServiceRegistry.GetService<IWeightProcessorService>();
 
-            var vm = new CalibrationDialogViewModel(canService, settings, dialogService, logger, weightProcessor, (byte)(canService.CurrentADCMode == AdcMode.Ads1115 ? 1 : 0), 500, isBrakeMode);
+            var vm = new CalibrationDialogViewModel(canService, settings, dialogService, logger, weightProcessor, axleType, (byte)(canService.CurrentADCMode == AdcMode.Ads1115 ? 1 : 0), 500, isBrakeMode);
             var diag = new CalibrationDialog(vm);
             diag.Owner = Application.Current.MainWindow;
             diag.ShowDialog();
