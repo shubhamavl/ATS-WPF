@@ -26,6 +26,7 @@ namespace ATS_WPF.ViewModels
         private LinearCalibration? _internalCalResult;
         private LinearCalibration? _ads1115CalResult;
 
+        private byte _adcMode;
         private bool _isBrakeMode;
         private int _calibrationDelayMs;
         private bool _isCapturingDualMode;
