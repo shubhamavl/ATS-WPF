@@ -119,7 +119,21 @@ namespace ATS_WPF.ViewModels
         }
 
         public bool IsHmvMode => _settings.Settings.VehicleMode == VehicleMode.HMV;
-        public bool IsSinglePortMode => !IsHmvMode;
+        public bool IsSinglePortMode => !IsHmvMode || UseSharedBusForHmv;
+
+        public bool UseSharedBusForHmv
+        {
+            get => _settings.Settings.UseSharedBusForHmv;
+            set
+            {
+                if (_settings.Settings.UseSharedBusForHmv != value)
+                {
+                    _settings.Settings.UseSharedBusForHmv = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsSinglePortMode));
+                }
+            }
+        }
 
         public ObservableCollection<string> BaudRates { get; } = new ObservableCollection<string>
         {
@@ -183,6 +197,7 @@ namespace ATS_WPF.ViewModels
         {
             OnPropertyChanged(nameof(IsHmvMode));
             OnPropertyChanged(nameof(IsSinglePortMode));
+            OnPropertyChanged(nameof(UseSharedBusForHmv));
             LoadSettings();
             RefreshPorts();
         }
@@ -224,7 +239,7 @@ namespace ATS_WPF.ViewModels
             {
                 if (IsUsbAdapter)
                 {
-                    if (IsHmvMode && (string.IsNullOrEmpty(SelectedLeftPort) || string.IsNullOrEmpty(SelectedRightPort)))
+                    if (IsHmvMode && !UseSharedBusForHmv && (string.IsNullOrEmpty(SelectedLeftPort) || string.IsNullOrEmpty(SelectedRightPort)))
                     {
                         MessageBox.Show("Please select both Left and Right COM ports for HMV mode.", "Connection Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                         return;

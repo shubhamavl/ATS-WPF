@@ -102,15 +102,39 @@ namespace ATS.CAN.Engine.Core
             else if (mode == VehicleMode.HMV)
             {
                 // 2 Nodes, 2 Axles (Left/Right)
-                var leftNode = CreateNode("Left", settings.LeftComPort);
-                var rightNode = CreateNode("Right", settings.RightComPort);
-                _nodes.Add(leftNode);
-                _nodes.Add(rightNode);
+                if (settings.UseSharedBusForHmv)
+                {
+                    // SHARED BUS: Both nodes on the same physical port
+                    var sharedService = CreateNode("Main", settings.ComPort); // Uses main port
+                    _nodes.Add(sharedService);
 
-                var leftAxle = CreateAxle(AxleType.Left, leftNode);
-                var rightAxle = CreateAxle(AxleType.Right, rightNode);
-                _axles.Add(leftAxle);
-                _axles.Add(rightAxle);
+                    var leftAxle = CreateAxle(AxleType.Left, sharedService);
+                    var rightAxle = CreateAxle(AxleType.Right, sharedService);
+                    
+                    // Assign BoardIds for Shared Bus differentiation
+                    leftAxle.WeightProcessor.BoardId = 1;  // Left Board = 1
+                    rightAxle.WeightProcessor.BoardId = 2; // Right Board = 2
+                    
+                    _axles.Add(leftAxle);
+                    _axles.Add(rightAxle);
+                    
+                    _logger.LogInfo("HMV initialized using Shared Bus (Single Port)", "SystemManager");
+                }
+                else
+                {
+                    // DUAL Port: Independent cables/ports for each side
+                    var leftNode = CreateNode("Left", settings.LeftComPort);
+                    var rightNode = CreateNode("Right", settings.RightComPort);
+                    _nodes.Add(leftNode);
+                    _nodes.Add(rightNode);
+
+                    var leftAxle = CreateAxle(AxleType.Left, leftNode);
+                    var rightAxle = CreateAxle(AxleType.Right, rightNode);
+                    _axles.Add(leftAxle);
+                    _axles.Add(rightAxle);
+                    
+                    _logger.LogInfo("HMV initialized using Dual Ports", "SystemManager");
+                }
             }
 
             NodesInitialized?.Invoke(this, EventArgs.Empty);

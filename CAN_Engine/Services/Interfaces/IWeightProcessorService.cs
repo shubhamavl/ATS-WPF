@@ -14,6 +14,7 @@ namespace ATS.CAN.Engine.Services.Interfaces
         ProcessedWeightData LatestTotal { get; }
         LinearCalibration? InternalCalibration { get; }
         LinearCalibration? Ads1115Calibration { get; }
+        byte BoardId { get; set; }
 
         void Start();
         void Stop();

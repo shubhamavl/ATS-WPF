@@ -62,6 +62,7 @@ namespace ATS_WPF.Services
             get => _settings.RightComPort; 
             set => _settings.RightComPort = value; 
         }
+        bool ICanSettings.UseSharedBusForHmv => _settings.UseSharedBusForHmv;
         ushort ICanSettings.CanBitrateKbps => GetBitrateValue(_settings.CanBaudRate);
         byte ICanSettings.TransmissionRateCode => (byte)_settings.TransmissionRate;
         int ICanSettings.DataTimeoutSeconds => _settings.DataTimeoutSeconds;

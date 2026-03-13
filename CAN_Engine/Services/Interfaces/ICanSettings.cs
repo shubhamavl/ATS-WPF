@@ -18,6 +18,9 @@ namespace ATS.CAN.Engine.Services.Interfaces
  
         /// <summary>COM port for HMV Right node</summary>
         string RightComPort { get; set; }
+ 
+        /// <summary>HMV: 2 nodes sharing a single CAN port</summary>
+        bool UseSharedBusForHmv { get; }
 
         /// <summary>CAN bus baud rate setting</summary>
         ushort CanBitrateKbps { get; }

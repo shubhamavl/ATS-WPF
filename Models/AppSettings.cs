@@ -14,6 +14,7 @@ namespace ATS_WPF.Models
         public string ComPort { get; set; } = string.Empty; // Default / TwoWheeler
         public string LeftComPort { get; set; } = string.Empty; // HMV
         public string RightComPort { get; set; } = string.Empty; // HMV
+        public bool UseSharedBusForHmv { get; set; } = false; // HMV: 2 nodes on 1 port
         public TransmissionRate TransmissionRate { get; set; } = TransmissionRate.Hz1000; // Default 1kHz sampling
         public CanBaudRate CanBaudRate { get; set; } = CanBaudRate.Bps250k; // Default 250kbps CAN
         public int TransmissionRateIndex { get; set; } = 3; // Index for 1kHz in streaming rates

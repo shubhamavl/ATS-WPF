@@ -77,10 +77,12 @@ namespace ATS.CAN.Engine.Services.CAN
                 if (canData.Length >= 2)
                 {
                     ushort rawADC = (ushort)(canData[0] | (canData[1] << 8));
+                    byte boardId = canData.Length >= 3 ? canData[2] : (byte)0; // BoardId info if available
                     RawDataReceived?.Invoke(this, new RawDataEventArgs
                     {
                         RawADCSum = rawADC,
                         CanId = canId,
+                        BoardId = boardId,
                         TimestampFull = DateTime.Now
                     });
                 }
@@ -90,10 +92,12 @@ namespace ATS.CAN.Engine.Services.CAN
                 if (canData.Length >= 4)
                 {
                     int rawADC = BitConverter.ToInt32(canData, 0);
+                    byte boardId = canData.Length >= 5 ? canData[4] : (byte)0; // BoardId info if available
                     RawDataReceived?.Invoke(this, new RawDataEventArgs
                     {
                         RawADCSum = rawADC,
                         CanId = canId,
+                        BoardId = boardId,
                         TimestampFull = DateTime.Now
                     });
                 }

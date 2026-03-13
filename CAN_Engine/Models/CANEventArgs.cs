@@ -8,6 +8,7 @@ namespace ATS.CAN.Engine.Models
         public string SideTag { get; set; } = string.Empty; 
         public uint CanId { get; set; }
         public int RawADCSum { get; set; }
+        public byte BoardId { get; set; } // Identifier for shared bus nodes
         public DateTime TimestampFull { get; set; } // PC reception timestamp
     }
 

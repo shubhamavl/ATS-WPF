@@ -18,6 +18,9 @@
                 <TextBlock Text="Adapter Type:" VerticalAlignment="Center" Width="120" FontWeight="SemiBold"/>
                 <ComboBox ItemsSource="{Binding AdapterTypes}" SelectedItem="{Binding SelectedAdapterType}"
                           Width="180" Margin="0,0,10,0"/>
+                <CheckBox Content="Shared Bus (Single Port)" IsChecked="{Binding UseSharedBusForHmv}" 
+                          VerticalAlignment="Center" 
+                          Visibility="{Binding IsHmvMode, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
             
             <!-- USB Settings (Single Port - Two-Wheeler / LMV) -->
