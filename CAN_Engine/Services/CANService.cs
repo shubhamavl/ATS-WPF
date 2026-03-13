@@ -414,7 +414,7 @@ namespace ATS.CAN.Engine.Services
                 var (canId, canData) = CANMessageProcessor.DecodeFrame(frame);
 
                 // Process two-wheeler system messages
-                if (CANMessageProcessor.IsTwoWheelerMessage(canId))
+                if (CANMessageProcessor.IsSystemMessage(canId))
                 {
                     var canMessage = new CANMessage(canId, canData);
                     MessageReceived?.Invoke(canMessage);

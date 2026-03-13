@@ -230,7 +230,7 @@ namespace ATS.CAN.Engine.Adapters
                         byte[] data = new byte[msg.Length];
                         Array.Copy(msg.Data, data, msg.Length);
 
-                        if (IsTwoWheelerMessage(msg.ID))
+                        if (IsSystemMessage(msg.ID))
                         {
                             var canMessage = new CANMessage(msg.ID, data, DateTime.Now);
                             MessageReceived?.Invoke(canMessage);
@@ -261,7 +261,7 @@ namespace ATS.CAN.Engine.Adapters
             }
         }
 
-        private bool IsTwoWheelerMessage(uint canId)
+        private bool IsSystemMessage(uint canId)
         {
             // Explicitly block 0x500 messages
             if (canId == 0x500)
@@ -279,6 +279,10 @@ namespace ATS.CAN.Engine.Adapters
                 case 0x400:  // Variable calibration data
                 case 0x401:  // Calibration quality analysis
                 case 0x402:  // Error response
+
+                // LMV Specific
+                case 0x048:  // Select LMV Stream
+                case 0x303:  // LMV stream confirmation
                     return true;
 
                 default:

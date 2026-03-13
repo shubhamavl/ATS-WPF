@@ -22,7 +22,7 @@ namespace ATS.CAN.Engine.Services
         public const uint CAN_MSG_ID_VERSION_RESPONSE = 0x301;
         public const uint CAN_MSG_ID_LMV_STREAM_CONFIRM = 0x303;   // Hardware confirmation of active stream
 
-        public static bool IsTwoWheelerMessage(uint canId)
+        public static bool IsSystemMessage(uint canId)
         {
             switch (canId)
             {

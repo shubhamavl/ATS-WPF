@@ -362,7 +362,7 @@ namespace ATS.CAN.Engine.Adapters
                     return;
                 }
 
-                if (canData != null && IsTwoWheelerMessage(canId))
+                if (canData != null && IsSystemMessage(canId))
                 {
                     var canMessage = new CANMessage(canId, canData);
                     MessageReceived?.Invoke(canMessage);
@@ -374,7 +374,7 @@ namespace ATS.CAN.Engine.Adapters
             }
         }
 
-        private bool IsTwoWheelerMessage(uint canId)
+        private bool IsSystemMessage(uint canId)
         {
             // Protocol v0.1 - ATS Two-Wheeler System - Semantic IDs
             switch (canId)
@@ -392,11 +392,13 @@ namespace ATS.CAN.Engine.Adapters
                 case 0x032:  // Request system status
                 case 0x033:  // Request firmware version
                 case 0x050:  // Set system mode (1 byte: 0=Weight, 1=Brake)
+                case 0x048:  // Select LMV Stream (1 byte: 0=Left, 1=Right)
 
                 // System Status (STM32 → PC3)
                 case 0x300:  // System status response
                 case 0x301:  // Firmware version response
                 case 0x302:  // System performance metrics
+                case 0x303:  // LMV stream confirmation
 
                 // Bootloader Protocol (must match BootloaderProtocol / STM32)
                 case 0x510:  // Enter Bootloader

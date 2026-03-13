@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Linq;
 using ATS_WPF.Models;
 using ATS.CAN.Engine.Models;
 using ATS_WPF.Services;
@@ -20,9 +22,14 @@ namespace ATS_WPF.Views
     public partial class MonitorWindow : Window
     {
         private readonly ObservableCollection<CANMessageEntry> _messages;
+        private readonly ConcurrentQueue<CANMessage> _messageQueue = new ConcurrentQueue<CANMessage>();
         private DispatcherTimer? _updateTimer;
         private bool _isMonitoring = false;
         private ICANService? _canService;
+
+        // Decoded IDs for descriptions
+        private readonly HashSet<uint> _rxIds = new HashSet<uint> { 0x200, 0x201, 0x300, 0x303 };
+        private readonly HashSet<uint> _txIds = new HashSet<uint> { 0x040, 0x048, 0x050, 0x032, 0x033 };
 
         public MonitorWindow(ICANService? canService = null)
         {
@@ -37,7 +44,7 @@ namespace ATS_WPF.Views
 
         private void InitializeUI()
         {
-            UpdateMessageCount();
+            UpdateMessageCountLabel();
         }
 
         private void StartMonitorBtn_Click(object sender, RoutedEventArgs e)
@@ -62,15 +69,13 @@ namespace ATS_WPF.Views
                     MonitorStatusTxt.Foreground = System.Windows.Media.Brushes.Orange;
                 }
 
-                // Start update timer (for UI updates only, messages come from events)
-                _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+                // Start update timer (Batched UI updates every 100ms)
+                _updateTimer = new DispatcherTimer(DispatcherPriority.Background) 
+                { 
+                    Interval = TimeSpan.FromMilliseconds(100) 
+                };
                 _updateTimer.Tick += UpdateTimer_Tick;
                 _updateTimer.Start();
-            }
-            catch (InvalidOperationException ex)
-            {
-                MessageBox.Show($"Monitor state error: {ex.Message}", "Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
@@ -99,11 +104,6 @@ namespace ATS_WPF.Views
                 _updateTimer?.Stop();
                 _updateTimer = null;
             }
-            catch (InvalidOperationException ex)
-            {
-                MessageBox.Show($"Monitor state error: {ex.Message}", "Error",
-                             MessageBoxButton.OK, MessageBoxImage.Error);
-            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Stop monitor error: {ex.Message}", "Error",
@@ -116,7 +116,9 @@ namespace ATS_WPF.Views
             try
             {
                 _messages.Clear();
-                UpdateMessageCount();
+                // Clear the backlog too
+                while (_messageQueue.TryDequeue(out _)) { }
+                UpdateMessageCountLabel();
             }
             catch (Exception ex)
             {
@@ -127,94 +129,65 @@ namespace ATS_WPF.Views
 
         private void UpdateTimer_Tick(object? sender, EventArgs e)
         {
-            try
+            if (!_isMonitoring) return;
+
+            bool addedAny = false;
+            int count = 0;
+            
+            // Drain the queue in the UI thread periodically
+            // This batched approach is MUCH more efficient than individual Dispatcher.Invoke calls
+            while (_messageQueue.TryDequeue(out var message) && count < 500) // Caps at 500 per 100ms to stay responsive
             {
-                if (!_isMonitoring)
+                string direction = message.Direction;
+                string canId = $"0x{message.ID:X3}";
+                string data = message.GetDataHexString();
+                
+                // Decode using ViewModel helper
+                var vm = new CANMessageViewModel(message, _rxIds, _txIds);
+                string description = vm.Decoded;
+
+                var entry = new CANMessageEntry
                 {
-                    return;
-                }
-
-                // Timer is now only for UI updates (message count, etc.)
-                // Actual messages come from CANService.MessageReceived event
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Update timer error: {ex.Message}", "Error",
-                               MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void OnCANMessageReceived(CANMessage message)
-        {
-            try
-            {
-                if (!_isMonitoring || message == null)
-                {
-                    return;
-                }
-
-                Dispatcher.Invoke(() =>
-                {
-                    string direction = message.Direction;
-                    string canId = $"0x{message.ID:X3}";
-                    string data = message.GetDataHexString();
-
-                    // Create ViewModel to get decoded description
-                    var rxIds = new HashSet<uint> { 0x200, 0x201, 0x300 };
-                    var txIds = new HashSet<uint> { 0x040, 0x041, 0x044, 0x030, 0x031, 0x032 };
-                    var vm = new CANMessageViewModel(message, rxIds, txIds);
-                    string description = vm.Decoded;
-
-                    AddMessage(direction, canId, data, description);
-                });
-            }
-            catch (Exception ex)
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    MessageBox.Show($"CAN message receive error: {ex.Message}", "Error",
-                                  MessageBoxButton.OK, MessageBoxImage.Error);
-                });
-            }
-        }
-
-        private void AddMessage(string direction, string canId, string data, string description)
-        {
-            try
-            {
-                var message = new CANMessageEntry
-                {
-                    Timestamp = DateTime.Now.ToString("HH:mm:ss.fff"),
+                    Timestamp = message.Timestamp.ToString("HH:mm:ss.fff"),
                     Direction = direction,
                     CanId = canId,
                     Data = data,
                     Description = description
                 };
 
-                _messages.Add(message);
+                _messages.Add(entry);
+                addedAny = true;
+                count++;
+            }
 
+            if (addedAny)
+            {
                 // Keep only last 1000 messages
                 while (_messages.Count > 1000)
                 {
                     _messages.RemoveAt(0);
                 }
 
-                // Auto-scroll to bottom
+                // Batch auto-scroll (only once per 100ms)
                 if (MessageListBox.Items.Count > 0)
                 {
                     MessageListBox.ScrollIntoView(MessageListBox.Items[MessageListBox.Items.Count - 1]);
                 }
 
-                UpdateMessageCount();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Add message error: {ex.Message}", "Error",
-                               MessageBoxButton.OK, MessageBoxImage.Error);
+                UpdateMessageCountLabel();
             }
         }
 
-        private void UpdateMessageCount()
+        private void OnCANMessageReceived(CANMessage message)
+        {
+            if (!_isMonitoring || message == null) return;
+            
+            // Extremely lightweight: just drop it in the thread-safe queue
+            // No Dispatcher effort here, so the CAN reader thread is NEVER blocked
+            _messageQueue.Enqueue(message);
+        }
+
+        private void UpdateMessageCountLabel()
         {
             MessageCountTxt.Text = $"{_messages.Count} messages";
         }
