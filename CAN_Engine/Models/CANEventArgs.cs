@@ -34,6 +34,7 @@ namespace ATS.CAN.Engine.Models
         public byte Minor { get; set; }              // Minor version number
         public byte Patch { get; set; }              // Patch version number
         public byte Build { get; set; }              // Build number
+        public byte BoardId { get; set; }            // Board ID
         public DateTime Timestamp { get; set; }      // PC3 reception timestamp
 
         public string VersionString => $"{Major}.{Minor}.{Patch}";

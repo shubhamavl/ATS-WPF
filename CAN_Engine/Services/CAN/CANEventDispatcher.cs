@@ -156,6 +156,7 @@ namespace ATS.CAN.Engine.Services.CAN
                     Minor = canData[1],
                     Patch = canData[2],
                     Build = canData[3],
+                    BoardId = canData.Length >= 5 ? canData[4] : (byte)0,
                     Timestamp = DateTime.Now
                 });
             }

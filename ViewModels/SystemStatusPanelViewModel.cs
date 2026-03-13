@@ -209,7 +209,13 @@ namespace ATS_WPF.ViewModels
         {
             System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                FirmwareVersionText = e.VersionString;
+                string boardName = e.BoardId switch
+                {
+                    0x01 => " (LMV)",
+                    0x02 => " (2W/HMV)",
+                    _ => ""
+                };
+                FirmwareVersionText = e.VersionString + boardName;
             });
         }
 
