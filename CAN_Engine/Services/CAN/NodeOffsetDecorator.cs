@@ -15,8 +15,7 @@ namespace ATS.CAN.Engine.Services.CAN
     public class NodeOffsetDecorator : ICANService
     {
         private readonly ICANService _inner;
-        private readonly int _rxOffset;     // Telemetry offset (Incoming FROM board)
-        private readonly int _txOffset;     // Command offset (Outgoing TO board)
+        private readonly int _nodeOffset;
         private readonly CANEventDispatcher _eventDispatcher;
 
         public NodeOffsetDecorator(ICANService inner, int nodeId)
@@ -26,13 +25,11 @@ namespace ATS.CAN.Engine.Services.CAN
             
             if (nodeId == 2)
             {
-                _rxOffset = 0x80;
-                _txOffset = 0x80;
+                _nodeOffset = 0x80;
             }
             else
             {
-                _rxOffset = 0;
-                _txOffset = 0;
+                _nodeOffset = 0;
             }
 
             // Wire up our dispatcher to our public events
@@ -75,12 +72,12 @@ namespace ATS.CAN.Engine.Services.CAN
             // Note: If nodeId is 1, offset is 0, so it matches base IDs.
             // If nodeId is 2, offset is 0x10, so it matches shifted IDs.
             
-            uint baseId = (m.ID >= (uint)_rxOffset) ? (m.ID - (uint)_rxOffset) : m.ID;
+            uint baseId = (m.ID >= (uint)_nodeOffset) ? (m.ID - (uint)_nodeOffset) : m.ID;
             
             // Re-check if this IS a message destined for this virtual node
             // (e.g. if we are Node 2, we ONLY care about 0x210, 0x310, etc.)
             bool match = false;
-            if (_rxOffset == 0)
+            if (_nodeOffset == 0)
             {
                 // Node 1: Matches base IDs exactly
                 match = m.ID == CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA ||
@@ -92,11 +89,11 @@ namespace ATS.CAN.Engine.Services.CAN
             else
             {
                 // Node 2: Matches shifted IDs
-                match = m.ID == (CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA + _rxOffset) ||
-                        m.ID == (CANMessageProcessor.CAN_MSG_ID_SYSTEM_STATUS + _rxOffset) ||
-                        m.ID == (CANMessageProcessor.CAN_MSG_ID_SYS_PERF + _rxOffset) ||
-                        m.ID == (CANMessageProcessor.CAN_MSG_ID_VERSION_RESPONSE + _rxOffset) ||
-                        m.ID == (CANMessageProcessor.CAN_MSG_ID_LMV_STREAM_CONFIRM + _rxOffset);
+                match = m.ID == (CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA + _nodeOffset) ||
+                        m.ID == (CANMessageProcessor.CAN_MSG_ID_SYSTEM_STATUS + _nodeOffset) ||
+                        m.ID == (CANMessageProcessor.CAN_MSG_ID_SYS_PERF + _nodeOffset) ||
+                        m.ID == (CANMessageProcessor.CAN_MSG_ID_VERSION_RESPONSE + _nodeOffset) ||
+                        m.ID == (CANMessageProcessor.CAN_MSG_ID_LMV_STREAM_CONFIRM + _nodeOffset);
             }
 
             if (match)
@@ -115,11 +112,8 @@ namespace ATS.CAN.Engine.Services.CAN
 
         // --- Outgoing Message Decoration (Addition) ---
 
-        public bool SendMessage(uint id, byte[] data, bool log = true)
-        {
             // Add offset to command IDs for this specific board
-            return _inner.SendMessage(id + (uint)_txOffset, data, log);
-        }
+            return _inner.SendMessage(id + (uint)_nodeOffset, data, log);
 
         public bool StartStream(TransmissionRate rate, uint startMsgId = CANMessageProcessor.CAN_MSG_ID_START_STREAM)
         {
