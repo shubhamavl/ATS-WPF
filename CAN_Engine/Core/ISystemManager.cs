@@ -14,6 +14,7 @@ namespace ATS.CAN.Engine.Core
         event EventHandler? NodesInitialized;
         
         void SetActiveNode(int index);
+        void SetActiveAxle(AxleType type);
         IReadOnlyList<CANNode> PhysicalNodes { get; }
         IReadOnlyList<AxleSystem> LogicalAxles { get; }
 

@@ -113,6 +113,12 @@ namespace ATS.CAN.Engine.Services.CAN
         public bool SwitchSystemMode(SystemMode mode) => _currentService?.SwitchSystemMode(mode) ?? false;
         public bool SelectLmvStream(AxleType side) => _currentService?.SelectLmvStream(side) ?? false;
         
+        public void SetActiveAxle(AxleType side)
+        {
+            // The proxy uses the SystemManager to handle both node switching (HMV) and relay switching (LMV)
+            _systemManager.SetActiveAxle(side);
+        }
+        
         public bool RequestSystemStatus(bool log = true) 
         {
             if (_currentService == null) return false;

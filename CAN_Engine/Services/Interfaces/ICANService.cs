@@ -30,6 +30,7 @@ namespace ATS.CAN.Engine.Services.Interfaces
         bool SwitchToADS1115();
         bool SwitchSystemMode(SystemMode mode);
         bool SelectLmvStream(AxleType side);
+        void SetActiveAxle(AxleType side);
         bool RequestSystemStatus(bool log = true);
         bool RequestFirmwareVersion();
         void SetTimeout(TimeSpan timeout);

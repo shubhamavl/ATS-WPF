@@ -43,6 +43,22 @@ namespace ATS.CAN.Engine.Core
             }
         }
 
+        public void SetActiveAxle(AxleType type)
+        {
+            if (CurrentMode == VehicleMode.HMV)
+            {
+                // HMV uses dual physical nodes (Left and Right)
+                int nodeIndex = type == AxleType.Right ? 1 : 0;
+                SetActiveNode(nodeIndex);
+            }
+            else if (CurrentMode == VehicleMode.LMV)
+            {
+                // LMV uses a single node with hardware relays for side switching
+                ActiveNodeService?.SelectLmvStream(type);
+                _logger.LogInfo($"LMV side selection command sent for: {type}", "SystemManager");
+            }
+        }
+
         public void Initialize(VehicleMode mode, string portMain)
         {
             _settings.ComPort = portMain;

@@ -160,12 +160,8 @@ namespace ATS_WPF.ViewModels
                 ActiveAxle = target;
                 SelectedAxleTab = type;
 
-                // Sync with hardware node for HMV mode
-                if (_systemManager.CurrentMode == VehicleMode.HMV)
-                {
-                    int nodeIndex = type == AxleType.Right ? 1 : 0;
-                    _systemManager.SetActiveNode(nodeIndex);
-                }
+                // Unified hardware sync (handles both HMV port switching and LMV relay switching)
+                _systemManager.SetActiveAxle(type);
             }
         }
 

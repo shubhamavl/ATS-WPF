@@ -565,6 +565,12 @@ namespace ATS.CAN.Engine.Services
             return success;
         }
 
+        public void SetActiveAxle(AxleType side)
+        {
+            // Base service just handles the relay switch (LMV logic)
+            SelectLmvStream(side);
+        }
+
         /// <summary>
         /// Switch system mode (Weight vs Brake)
         /// </summary>
