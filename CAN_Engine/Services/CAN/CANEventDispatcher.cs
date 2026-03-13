@@ -129,6 +129,7 @@ namespace ATS.CAN.Engine.Services.CAN
                     ADCMode = adcMode,
                     RelayState = (SystemMode)relayState,
                     UptimeSeconds = uptime,
+                    BoardId = canData.Length >= 7 ? canData[6] : (byte)0,
                     Timestamp = DateTime.Now
                 });
             }

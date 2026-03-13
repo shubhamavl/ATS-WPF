@@ -8,6 +8,7 @@ namespace ATS.CAN.Engine.Core
     public interface ISystemManager
     {
         VehicleMode CurrentMode { get; }
+        ICanSettings Settings { get; }
         int ActiveNodeIndex { get; }
         ICANService ActiveNodeService { get; }
         event EventHandler? ActiveNodeChanged;

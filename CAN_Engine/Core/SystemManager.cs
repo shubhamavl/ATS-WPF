@@ -22,6 +22,7 @@ namespace ATS.CAN.Engine.Core
         public event EventHandler? NodesInitialized;
 
         public VehicleMode CurrentMode { get; private set; }
+        public ICanSettings Settings => _settings;
         public IReadOnlyList<CANNode> PhysicalNodes => _nodes.AsReadOnly();
         public IReadOnlyList<AxleSystem> LogicalAxles => _axles.AsReadOnly();
 

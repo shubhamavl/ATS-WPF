@@ -19,6 +19,7 @@ namespace ATS.CAN.Engine.Models
         public AdcMode ADCMode { get; set; }        // Current ADC mode
         public SystemMode RelayState { get; set; }        // Current relay state (0=Weight, 1=Brake)
         public uint UptimeSeconds { get; set; }     // System uptime in seconds
+        public byte BoardId { get; set; }           // Board identifier
         public DateTime Timestamp { get; set; }     // PC3 reception timestamp
     }
 
