@@ -112,8 +112,11 @@ namespace ATS.CAN.Engine.Services.CAN
 
         // --- Outgoing Message Decoration (Addition) ---
 
+        public bool SendMessage(uint id, byte[] data, bool log = true)
+        {
             // Add offset to command IDs for this specific board
             return _inner.SendMessage(id + (uint)_nodeOffset, data, log);
+        }
 
         public bool StartStream(TransmissionRate rate, uint startMsgId = CANMessageProcessor.CAN_MSG_ID_START_STREAM)
         {
