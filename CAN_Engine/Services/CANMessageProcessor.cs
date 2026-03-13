@@ -24,7 +24,28 @@ namespace ATS.CAN.Engine.Services
 
         public static bool IsSystemMessage(uint canId)
         {
-            switch (canId)
+            // 1. Check if it's a base system ID (Node 1)
+            if (IsBaseSystemId(canId)) return true;
+
+            // 2. Check if it's a shifted Telemetry ID (Node 2, +0x10)
+            if (canId >= 0x210 && canId <= 0x320)
+            {
+                if (IsBaseSystemId(canId - 0x10)) return true;
+            }
+
+            // 3. Check if it's a shifted Command ID (Node 2, +0x02)
+            // (Note: PC usually doesn't receive these, but good for loopback/sniffer)
+            if (canId >= 0x032 && canId <= 0x062)
+            {
+                if (IsBaseSystemId(canId - 2)) return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsBaseSystemId(uint id)
+        {
+            switch (id)
             {
                 case CAN_MSG_ID_TOTAL_RAW_DATA:
                 case CAN_MSG_ID_START_STREAM:
@@ -42,8 +63,7 @@ namespace ATS.CAN.Engine.Services
                     return true;
                 default:
 #if CAN_ENGINE_BOOTLOADER
-                    // Check bootloader IDs separately or include here
-                    return IsBootloaderMessage(canId);
+                    return IsBootloaderMessage(id);
 #else
                     return false;
 #endif

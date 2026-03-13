@@ -4,6 +4,7 @@ using ATS.CAN.Engine.Models;
 using ATS.CAN.Engine.Adapters;
 using ATS.CAN.Engine.Services;
 using ATS.CAN.Engine.Services.Interfaces;
+using ATS.CAN.Engine.Services.CAN;
 
 namespace ATS.CAN.Engine.Core
 {
@@ -16,7 +17,7 @@ namespace ATS.CAN.Engine.Core
 
         private int _activeNodeIndex = 0;
         public int ActiveNodeIndex => _activeNodeIndex;
-        public ICANService ActiveNodeService => (_nodes.Count > _activeNodeIndex) ? _nodes[_activeNodeIndex].CanService : (_nodes.Count > 0 ? _nodes[0].CanService : null!);
+        public ICANService ActiveNodeService => (_axles.Count > _activeNodeIndex) ? _axles[_activeNodeIndex].PrimaryNode.CanService : (_nodes.Count > 0 ? _nodes[0].CanService : null!);
         public event EventHandler? ActiveNodeChanged;
         public event EventHandler? NodesInitialized;
 
@@ -35,11 +36,12 @@ namespace ATS.CAN.Engine.Core
 
         public void SetActiveNode(int index)
         {
-            if (index >= 0 && index < _nodes.Count && _activeNodeIndex != index)
+            int maxCount = Math.Max(_nodes.Count, _axles.Count);
+            if (index >= 0 && index < maxCount && _activeNodeIndex != index)
             {
                 _activeNodeIndex = index;
                 ActiveNodeChanged?.Invoke(this, EventArgs.Empty);
-                _logger.LogInfo($"Active CAN node switched to index: {index}", "SystemManager"); // Replaced ProductionLogger
+                _logger.LogInfo($"Active index switched to: {index}", "SystemManager"); 
             }
         }
 
@@ -104,21 +106,21 @@ namespace ATS.CAN.Engine.Core
                 // 2 Nodes, 2 Axles (Left/Right)
                 if (settings.UseSharedBusForHmv)
                 {
-                    // SHARED BUS: Both nodes on the same physical port
-                    var sharedService = CreateNode("Main", settings.ComPort); // Uses main port
-                    _nodes.Add(sharedService);
+                    // SHARED BUS: One physical port, two logical addressing decorators
+                    var physicalNode = CreateNode("Main", settings.ComPort); 
+                    _nodes.Add(physicalNode);
 
-                    var leftAxle = CreateAxle(AxleType.Left, sharedService);
-                    var rightAxle = CreateAxle(AxleType.Right, sharedService);
-                    
-                    // Assign BoardIds for Shared Bus differentiation
-                    leftAxle.WeightProcessor.BoardId = 1;  // Left Board = 1
-                    rightAxle.WeightProcessor.BoardId = 2; // Right Board = 2
+                    // Create logical nodes with decorators for ID shifting and filtering
+                    var leftNode = new CANNode("Left", new NodeOffsetDecorator(physicalNode.CanService, 1));
+                    var rightNode = new CANNode("Right", new NodeOffsetDecorator(physicalNode.CanService, 2));
+
+                    var leftAxle = CreateAxle(AxleType.Left, leftNode);
+                    var rightAxle = CreateAxle(AxleType.Right, rightNode);
                     
                     _axles.Add(leftAxle);
                     _axles.Add(rightAxle);
                     
-                    _logger.LogInfo("HMV initialized using Shared Bus (Single Port)", "SystemManager");
+                    _logger.LogInfo("HMV initialized using Shared Bus Decorators (Single Port)", "SystemManager");
                 }
                 else
                 {
@@ -223,29 +225,25 @@ namespace ATS.CAN.Engine.Core
 
         public void StartStreamAll()
         {
-            if (CurrentMode == VehicleMode.LMV)
+            // Get unique services to avoid redundant calls (important for LMV sharing a single port)
+            var items = new List<ICANService>();
+            foreach(var axle in _axles)
             {
-                // LMV: Start main stream (0x040) on the single Main node. 
-                // Selection of left/right side (0x048) is handled sequentially in UI or WeightProcessor.
-                if (_nodes.Count > 0)
-                {
-                    _nodes[0].CanService.StartStream((TransmissionRate)_settings.TransmissionRateCode, CANMessageProcessor.CAN_MSG_ID_START_STREAM);
-                }
+                if (!items.Contains(axle.PrimaryNode.CanService))
+                    items.Add(axle.PrimaryNode.CanService);
             }
-            else
+
+            foreach (var svc in items)
             {
-                foreach (var node in _nodes)
-                {
-                    node.CanService.StartStream((TransmissionRate)_settings.TransmissionRateCode);
-                }
+                svc.StartStream((TransmissionRate)_settings.TransmissionRateCode);
             }
         }
 
         public void StopStreamAll()
         {
-            foreach (var node in _nodes)
+            foreach (var axle in _axles)
             {
-                node.CanService.StopAllStreams();
+                axle.PrimaryNode.CanService.StopAllStreams();
             }
         }
 
@@ -262,9 +260,9 @@ namespace ATS.CAN.Engine.Core
 
         public void SetBrakeModeAll(bool isBrakeMode)
         {
-            foreach (var node in _nodes)
+            foreach (var axle in _axles)
             {
-                node.CanService.SwitchSystemMode(isBrakeMode ? SystemMode.Brake : SystemMode.Weight);
+                axle.PrimaryNode.CanService.SwitchSystemMode(isBrakeMode ? SystemMode.Brake : SystemMode.Weight);
             }
         }
 

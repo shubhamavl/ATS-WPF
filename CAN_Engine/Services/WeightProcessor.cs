@@ -58,8 +58,6 @@ namespace ATS.CAN.Engine.Services
         private readonly Queue<double> _totalSmaCalibrated = new Queue<double>();
         private readonly Queue<double> _totalSmaTared = new Queue<double>();
 
-        public byte BoardId { get; set; } = 0; // Filter for shared bus
-        public uint TargetCanId { get; set; } = CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA;
 
         public ProcessedWeightData LatestTotal => _latestTotal;
         public LinearCalibration? InternalCalibration => _internalCalibration;
@@ -137,14 +135,6 @@ namespace ATS.CAN.Engine.Services
 
         private bool IsStreamForThisAxle(RawDataEventArgs e)
         {
-            if (_vehicleMode == VehicleMode.HMV && _settings.UseSharedBusForHmv)
-            {
-                // For Shared Bus HMV, we distinguish by BoardId or specific CanId
-                if (e.CanId != TargetCanId) return false;
-                if (BoardId != 0 && e.BoardId != BoardId) return false;
-                return true;
-            }
-
             if (_vehicleMode != VehicleMode.LMV) return true;
             if (e.CanId != CANMessageProcessor.CAN_MSG_ID_TOTAL_RAW_DATA) return false;
             return _axleType == _confirmedLmvSide;
