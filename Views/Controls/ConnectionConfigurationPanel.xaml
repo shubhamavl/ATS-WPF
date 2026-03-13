@@ -55,7 +55,7 @@
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
                                     <Condition Binding="{Binding IsUsbAdapter}" Value="True"/>
-                                    <Condition Binding="{Binding IsHmvMode}" Value="True"/>
+                                    <Condition Binding="{Binding IsDualPortMode}" Value="True"/>
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Visibility" Value="Visible"/>
                             </MultiDataTrigger>

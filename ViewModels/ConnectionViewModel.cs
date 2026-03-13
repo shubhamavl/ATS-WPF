@@ -120,6 +120,7 @@ namespace ATS_WPF.ViewModels
 
         public bool IsHmvMode => _settings.Settings.VehicleMode == VehicleMode.HMV;
         public bool IsSinglePortMode => !IsHmvMode || UseSharedBusForHmv;
+        public bool IsDualPortMode => IsHmvMode && !UseSharedBusForHmv;
 
         public bool UseSharedBusForHmv
         {
@@ -131,6 +132,7 @@ namespace ATS_WPF.ViewModels
                     _settings.Settings.UseSharedBusForHmv = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(IsSinglePortMode));
+                    OnPropertyChanged(nameof(IsDualPortMode));
                 }
             }
         }
@@ -197,6 +199,7 @@ namespace ATS_WPF.ViewModels
         {
             OnPropertyChanged(nameof(IsHmvMode));
             OnPropertyChanged(nameof(IsSinglePortMode));
+            OnPropertyChanged(nameof(IsDualPortMode));
             OnPropertyChanged(nameof(UseSharedBusForHmv));
             LoadSettings();
             RefreshPorts();
