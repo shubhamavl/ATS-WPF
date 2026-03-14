@@ -89,5 +89,14 @@ namespace ATS.CAN.Engine.Models
         ThreeWheeler = 2,
         HMV = 3
     }
+
+    /// <summary>
+    /// Supported communication transports (Physical layers)
+    /// </summary>
+    public enum CommunicationType
+    {
+        CAN = 0,
+        RS485 = 1
+    }
 }
 

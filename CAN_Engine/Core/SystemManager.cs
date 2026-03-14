@@ -188,12 +188,24 @@ namespace ATS.CAN.Engine.Core
                               
                 _logger.LogInfo($"Connecting node '{node.NodeId}' on port '{port}'...", "SystemManager");
 
-                var config = new UsbSerialCanAdapterConfig
+                CanAdapterConfig config;
+                if (_settings.CommunicationType == CommunicationType.RS485)
                 {
-                    PortName = port,
-                    BitrateKbps = _settings.CanBitrateKbps, 
-                    SerialBaudRate = 2000000
-                };
+                    config = new SerialRs485AdapterConfig
+                    {
+                        PortName = port,
+                        BaudRate = 921600 // Fixed for Virtual CAN high-speed firmware
+                    };
+                }
+                else
+                {
+                    config = new UsbSerialCanAdapterConfig
+                    {
+                        PortName = port,
+                        BitrateKbps = _settings.CanBitrateKbps,
+                        SerialBaudRate = 2000000
+                    };
+                }
                 
                 if (node.CanService.Connect(config, out string error))
                 {

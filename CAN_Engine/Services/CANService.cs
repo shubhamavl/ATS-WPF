@@ -173,6 +173,10 @@ namespace ATS.CAN.Engine.Services
                 adapter = new PcanCanAdapter(_logger);
             }
 #endif
+            else if (config is SerialRs485AdapterConfig)
+            {
+                adapter = new SerialRs485Adapter(_logger);
+            }
             else
             {
                 errorMessage = "Unknown adapter configuration type";

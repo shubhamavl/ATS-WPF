@@ -105,6 +105,22 @@ namespace ATS.CAN.Engine.Adapters
         public ushort PcanBitrate { get; set; } = 0x001C; // PCAN_BAUD_500K
     }
 #endif
+
+    /// <summary>
+    /// Configuration for RS485 (Direct Serial) adapter
+    /// </summary>
+    public class SerialRs485AdapterConfig : CanAdapterConfig
+    {
+        /// <summary>
+        /// COM port name (e.g., "COM3")
+        /// </summary>
+        public string PortName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Serial port baud rate (default 921600 for high-speed firmware)
+        /// </summary>
+        public int BaudRate { get; set; } = 921600;
+    }
 }
 
 

@@ -65,7 +65,7 @@ namespace ATS_WPF.ViewModels
         }
 
         // Adapter Configuration
-        public ObservableCollection<string> AdapterTypes { get; } = new ObservableCollection<string> { "USB-CAN-A Serial", "PCAN" };
+        public ObservableCollection<string> AdapterTypes { get; } = new ObservableCollection<string> { "USB-CAN-A Serial", "PCAN", "RS485 Unified" };
 
         private string _selectedAdapterType = "USB-CAN-A Serial";
         public string SelectedAdapterType
@@ -77,6 +77,7 @@ namespace ATS_WPF.ViewModels
                 {
                     IsUsbAdapter = value == "USB-CAN-A Serial";
                     IsPcanAdapter = value == "PCAN";
+                    IsRs485Adapter = value == "RS485 Unified";
                 }
             }
         }
@@ -93,6 +94,13 @@ namespace ATS_WPF.ViewModels
         {
             get => _isPcanAdapter;
             set => SetProperty(ref _isPcanAdapter, value);
+        }
+
+        private bool _isRs485Adapter;
+        public bool IsRs485Adapter
+        {
+            get => _isRs485Adapter;
+            set => SetProperty(ref _isRs485Adapter, value);
         }
 
         public ObservableCollection<string> AvailablePorts { get; } = new ObservableCollection<string>();
@@ -183,9 +191,18 @@ namespace ATS_WPF.ViewModels
 
         private void LoadSettings()
         {
-            SelectedAdapterType = "USB-CAN-A Serial";
+            if (_settings.Settings.CommunicationType == CommunicationType.RS485)
+            {
+                SelectedAdapterType = "RS485 Unified";
+            }
+            else
+            {
+                SelectedAdapterType = "USB-CAN-A Serial"; // Default
+            }
+
             IsUsbAdapter = SelectedAdapterType == "USB-CAN-A Serial";
             IsPcanAdapter = SelectedAdapterType == "PCAN";
+            IsRs485Adapter = SelectedAdapterType == "RS485 Unified";
 
             SelectedPort = _settings.Settings.ComPort;
             SelectedLeftPort = _settings.Settings.LeftComPort;
@@ -240,7 +257,7 @@ namespace ATS_WPF.ViewModels
             }
             else
             {
-                if (IsUsbAdapter)
+                if (IsUsbAdapter || IsRs485Adapter)
                 {
                     if (IsHmvMode && !UseSharedBusForHmv && (string.IsNullOrEmpty(SelectedLeftPort) || string.IsNullOrEmpty(SelectedRightPort)))
                     {
@@ -253,7 +270,6 @@ namespace ATS_WPF.ViewModels
                         return;
                     }
 
-                    // Update and save settings
                     _settings.SetComPort(SelectedPort);
                     if (IsHmvMode)
                     {
@@ -261,6 +277,10 @@ namespace ATS_WPF.ViewModels
                         _settings.Settings.RightComPort = SelectedRightPort;
                     }
                     _settings.SetCanBaudRate(SelectedBaudRate);
+                    
+                    // Update communication type based on selection
+                    _settings.Settings.CommunicationType = IsRs485Adapter ? CommunicationType.RS485 : CommunicationType.CAN;
+                    
                     _settings.SaveSettings();
                 }
                 else if (IsPcanAdapter)

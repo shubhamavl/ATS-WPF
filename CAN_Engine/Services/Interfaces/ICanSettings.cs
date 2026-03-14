@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Concurrent;
+using ATS.CAN.Engine.Models;
+using ATS.CAN.Engine.Services;
 
 namespace ATS.CAN.Engine.Services.Interfaces
 {
@@ -21,6 +24,9 @@ namespace ATS.CAN.Engine.Services.Interfaces
  
         /// <summary>HMV: 2 nodes sharing a single CAN port</summary>
         bool UseSharedBusForHmv { get; }
+
+        /// <summary>Active communication transport (CAN or RS485)</summary>
+        CommunicationType CommunicationType { get; }
 
         /// <summary>CAN bus baud rate setting</summary>
         ushort CanBitrateKbps { get; }
