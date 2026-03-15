@@ -32,6 +32,10 @@ The `SystemManager` adapts the system's logical structure based on the selected 
 | **LMV** | 1 | 2 (Left/Right) | Multiplexed streams via hardware relays. |
 | **HMV** | 2 | 2 (Left/Right) | Dual independent nodes and ports (or shared bus). |
 
+### HMV Configuration Modes:
+- **Dual Ports (Default)**: Each side (Left/Right) has its own physical USB-CAN adapter and is connected to a separate COM port. This provides the highest bandwidth and reliability.
+- **Shared Bus**: Both nodes are connected to a single physical CAN bus and one COM port. The software uses `NodeOffsetDecorator` to handle logical addressing for the second node.
+
 ## Dependency Injection
 The application uses a `ServiceRegistry` (located in `Core/`) to manage service lifetimes and handle dependency injection. This allows ViewModels to receive necessary services (like `ICANService` or `ISettingsService`) via their constructors, promoting a loosely coupled design.
 

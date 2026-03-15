@@ -15,6 +15,19 @@ The serial communication with the USB-CAN-A adapter uses a fixed 20-byte frame f
 | 4-11 | Data | 8 bytes of CAN data payload |
 | 12-19 | Footer/Padding | Reserved for future use |
 
+## RS485 / Virtual CAN Framing
+When using the RS485 transport, the system uses a 14-byte "Virtual CAN" frame format:
+
+| Byte Index | Field | Description |
+| :--- | :--- | :--- |
+| 0 | Header | `0xAA` |
+| 1 | ID High | CAN ID (bits 8-10) |
+| 2 | ID Low | CAN ID (bits 0-7) |
+| 3 | DLC | Data Length Code (0-8) |
+| 4-11 | Data | 8 bytes of CAN data payload |
+| 12 | CRC | XOR of bytes 0-11 |
+| 13 | Footer | `0x55` |
+
 ## Semantic Message IDs
 The system uses specific CAN IDs to categorize different types of messages:
 
