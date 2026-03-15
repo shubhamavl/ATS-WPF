@@ -44,9 +44,18 @@ A professional Windows WPF application for real-time weight monitoring, calibrat
 - **Release Date**: 2026-03-09
 - **Namespace**: `ATS_WPF`
 
+## 📚 Documentation
+
+- [Architecture Overview](docs/ARCHITECTURE.md) - Deep dive into the MVVM pattern and system design.
+- [CAN Protocol](docs/CAN_PROTOCOL.md) - Technical details of the binary communication protocol.
+- [Calibration & Math](docs/CALIBRATION.md) - Detailed explanation of regression and measurement logic.
+- [Developer Guide](docs/DEVELOPER_GUIDE.md) - Setup instructions and coding standards for contributors.
+- [FAQ](docs/FAQ.md) - Frequently asked questions and troubleshooting.
+- [User Guide](USER_GUIDE.md) - Instructions for end-users on operating the dashboard.
+
 ## 📞 Support
 
-For technical support or feature requests, please refer to the internal [USER_GUIDE.md](USER_GUIDE.md) or [docs/FAQ.md](docs/FAQ.md).
+For technical support or feature requests, please refer to the [FAQ](docs/FAQ.md) or open an issue on GitHub.
 
 ---
 
